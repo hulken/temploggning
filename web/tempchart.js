@@ -26,7 +26,7 @@ TempChart.prototype = {
 
 	// Constants
 	// ---------------
-	URL: 'http://hultman.no-ip.org/getData.php',
+	URL: 'getdata.php',
 	USE_CACHE: true,
 
 	// Varibles
