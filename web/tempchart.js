@@ -402,6 +402,9 @@ TempChart.prototype = {
 			case '#latest': 
 				return 'latest';
 				break;
+			case '#day': 
+				return 1;
+				break;
 			case '#week': 
 				return 7;
 				break;
