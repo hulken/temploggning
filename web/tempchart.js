@@ -264,7 +264,7 @@ TempChart.prototype = {
 		var str = '<div class="well">' + 
 				'<form id="customView" class="form-horizontal">' +
 				'<div class="control-group">' +
-				'<label class="control-label" for="fromdatetime">Från</label>' +
+				'<label class="control-label" for="fromdatetime">Fr&aring;n</label>' +
 				'<div class="controls">' +
 		 			'<div class="input-append date datetimepicker">' +
 			   			'<input id="fromdatetime" data-format="yyyy-MM-dd hh:mm" type="text" value="' + Highcharts.dateFormat('%Y-%m-%d %H:%M', d.setDate(d.getDate() - 1)) + '"></input>' +
@@ -307,7 +307,7 @@ TempChart.prototype = {
 		});
 		str += '</select>' +
 				'</div>' +
-				'<label class="control-label" for="fromdatetime">Från</label>' +
+				'<label class="control-label" for="fromdatetime">Fr&aring;n</label>' +
 				'<div class="controls">' +
 		 			'<div class="input-append date datetimepicker">' +
 			   			'<input id="fromdatetime" data-format="yyyy-MM-dd hh:mm" type="text" value="' + Highcharts.dateFormat('%Y-%m-%d %H:%M', d.setDate(d.getDate() - 1)) + '"></input>' +
@@ -327,7 +327,7 @@ TempChart.prototype = {
 	  			'</div>' +
 
 	  			'</div>' +
-				'<label class="control-label" for="fromdatetime">Från</label>' +
+				'<label class="control-label" for="fromdatetime">Fr&aring;n</label>' +
 				'<div class="controls">' +
 		 			'<div class="input-append date datetimepicker">' +
 			   			'<input id="fromdatetime" data-format="yyyy-MM-dd hh:mm" type="text" value="' + Highcharts.dateFormat('%Y-%m-%d %H:%M', d.setDate(d.getDate() - 365)) + '"></input>' +
