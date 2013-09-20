@@ -28,6 +28,8 @@ IF (@current_version == 1) BEGIN
 	ALTER TABLE `sensors` ADD PRIMARY KEY (`sensor_id`);
 	ALTER TABLE `sensors` ADD UNIQUE `ix_id` (`id`);
 	
+    ALTER TABLE `sensors` CHANGE `sensor_id` `sensor_id` INT( 11 ) NOT NULL AUTO_INCREMENT 
+    
 	-- Get all of the sensor data into the readings table
 	INSERT INTO readings (`sensor_id`, `date`, `temp`) SELECT 1, franluft_efter.`date`, franluft_efter.`temp` FROM franluft_efter;
 	INSERT INTO readings (`sensor_id`, `date`, `temp`) SELECT 2, vvb.`date`, vvb.`temp` FROM vvb;
