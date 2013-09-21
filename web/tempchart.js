@@ -112,8 +112,8 @@ TempChart.prototype = {
 				sensor: sensor.name,
                 tempstring: (new Date()).getTime(),
 			};
-			if(typeof me.USE_CACHE !== 'undefiend') { params.usecache = me.USE_CACHE; }
-			if(typeof period !== 'undefiend' && period !== null) { params.period = period; }
+			if(typeof me.USE_CACHE !== 'undefined') { params.usecache = me.USE_CACHE; }
+			if(typeof period !== 'undefined' && period !== null) { params.period = period; }
 			if(from) { 	 params.from = from; }
 			if(to) { 	 params.to = to; } 
 			$.getJSON(me.URL + '?' + $.param(params), function(data) {
