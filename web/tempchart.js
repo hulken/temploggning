@@ -229,7 +229,7 @@ TempChart.prototype = {
             tooltip: {
                 formatter: function() {
                         return '<b>'+ this.series.name +'</b> <br/>'+
-                        Highcharts.dateFormat('%Y.%m.%d %H:%M', this.x) +' <b>'+ this.y.toFixed(2) +' °C</b>';
+                        Highcharts.dateFormat('%Y.%m.%d %H:%M', this.x) +' <b>'+ this.y.toFixed(2) +' \u00B0C</b>';
                 }
             },
 			plotOptions: {
