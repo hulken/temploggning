@@ -17,7 +17,7 @@ if(isset($_GET['sensor'])) {
 		$period = $_GET['period'];
 		
 		if($period === 'latest'){
-			$period = 0;
+			$period = 10000;
 		}
 	} else if(!isset($period)){
 		$period = 1;
@@ -45,6 +45,11 @@ if(isset($_GET['sensor'])) {
 		
 	$order = "date ASC";
 	
+    // Set back the period properly in order to not mess up the jsoncache
+    if (isset($_GET['period']) && $period == 10000) {
+        $period = 0;
+    }
+    
 	//Try to read from cache
 	if(isset($_GET['usecache']) && $_GET['usecache'] == "true") 
 	{
@@ -54,10 +59,15 @@ if(isset($_GET['sensor'])) {
 	if(!isset($outStr) || !$outStr) 
 	{
 		if(isset($_GET['period']) && $_GET['period'] == 'latest') {
-			$query = "SELECT UNIX_TIMESTAMP(date) AS date, temp FROM " . getReadingsDbTableName($sensor) . getWhereStatementLatest($sensor) . ";";
+			$query = "SELECT UNIX_TIMESTAMP(date) AS date, temp FROM " . getReadingsDbTableName($sensor) . " WHERE " . getWhereStatementLatest($sensor, $where) . ";";
 		}
 		else {
-			$query = "SELECT UNIX_TIMESTAMP(date) AS date, temp FROM " . getReadingsDbTableName($sensor) . " WHERE $where " . getWhereStatementPeriod($sensor) . " $groupby ORDER BY $order";
+            if ($period >= 7) {
+                $query = "SELECT UNIX_TIMESTAMP(MIN(date)) AS date, AVG(temp) AS temp FROM " . getReadingsDbTableName($sensor) . " WHERE $where " . getWhereStatementPeriod($sensor, '') . " $groupby ORDER BY $order";
+            }
+            else {
+                $query = "SELECT UNIX_TIMESTAMP(date) AS date, temp AS temp FROM " . getReadingsDbTableName($sensor) . " WHERE $where " . getWhereStatementPeriod($sensor, '') . " $groupby ORDER BY $order";
+            }
 		}
 
 		if (isset($_GET['debug'])) {
@@ -97,7 +107,7 @@ if(isset($_GET['sensor'])) {
 
 echo $outStr;
 
-function getWhereStatementLatest($sensor_name) {
+function getWhereStatementLatest($sensor_name, $where) {
 	if (Settings::DB_SCHEMA_VERSION == 1)
 	{
 		return " WHERE date = (SELECT MAX(date) FROM sensors AND name = $sensor_name)";
