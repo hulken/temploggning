@@ -110,6 +110,7 @@ TempChart.prototype = {
 		$.each(sensors, function(i, sensor) {
 			var params = {
 				sensor: sensor.name,
+                tempstring: (new Date()).getTime(),
 			};
 			if(typeof me.USE_CACHE !== 'undefiend') { params.usecache = me.USE_CACHE; }
 			if(typeof period !== 'undefiend' && period !== null) { params.period = period; }
