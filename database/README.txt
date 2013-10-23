@@ -1,0 +1,1 @@
+If setting up a new environment, I recommend to use the highest version number in order to avoid problems. The rest of the components might not be backward compatible with older schema versions
