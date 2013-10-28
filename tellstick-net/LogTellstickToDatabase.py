@@ -1,18 +1,43 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+def module_exists(module_name):
+    try:
+        mod = __import__(module_name)
+    except ImportError:
+        return False
+    else:
+        return True
+
 import datetime;
 import time;
 import sys, getopt, httplib, urllib, json, os
-import oauth.oauth as oauth
+if module_exists('oauth'):
+    import oauth.oauth as oauth
 import StringIO
 import mysql.connector
-import tdsens
+
+config = {
+    "logtype": "1wire",
+    "db": {
+        "host": "localhost",
+        "user": "temploggning",
+        "password": "temploggning",
+        "database": "temploggning"
+    }
+}
+
+if(config["logtype"] == "tellstick"):
+    import tdsens
+    logger = tdsens
+elif(config["logtype"] == "1wire"):
+    import owsens
+    logger = owsens
 
 # Get all sensors from API
-tdsens.readSettings()
-response = tdsens.listSensors()
+logger.readSettings()
+response = logger.listSensors()
 
-db = mysql.connector.connect(host="localhost", user="temploggning", password="temploggning", database="temploggning", buffered=True)
+db = mysql.connector.connect(host=config["db"]["host"], user=config["db"]["user"], password=config["db"]["password"], database=config["db"]["database"], buffered=True)
 
 for sensor in response['sensor']:
     id = sensor['id']
@@ -22,7 +47,7 @@ for sensor in response['sensor']:
     cursor = db.cursor()
     
     # Check if the sensor exists in the database
-    cursor.execute("SELECT sensor_id FROM sensors WHERE id = " + id)
+    cursor.execute("SELECT sensor_id FROM sensors WHERE id = '" + id + "'")
     db_rows = cursor.fetchone()
     
     sensor_db_id = 0;
@@ -34,7 +59,7 @@ for sensor in response['sensor']:
     else:
         data = (id,  name, "#000000")
         cursor.execute("INSERT INTO sensors (id, name, color) VALUES (%s, %s, %s)", data)
-        cursor.execute("SELECT sensor_id FROM sensors WHERE id = " + id)
+        cursor.execute("SELECT sensor_id FROM sensors WHERE id = '" + id + "'")
         db_rows = cursor.fetchone()
         
         if (db_rows is not None and len(db_rows) > 0):
@@ -42,7 +67,7 @@ for sensor in response['sensor']:
     
     # Get the current sensor information from API
     #reading = subprocess.check_output(["tdsens.py", "-i " + line], shell=True)
-    reading = tdsens.infoSensor(id)    
+    reading = logger.infoSensor(id)    
 
     lastUpdated = reading['lastUpdated']
     lastUpdatedReadable = datetime.datetime.fromtimestamp(int(lastUpdated)).strftime('%Y-%m-%d %H:%M:%S')

@@ -159,7 +159,7 @@ TempChart.prototype = {
 			if (serie.data.length > 0) {
 				d = Highcharts.dateFormat('%Y.%m.%d %H:%M', new Date(serie.data[0][0]));
 				tableStr += '<tr class="' + colorClass +'"><td class="first-td"><h1 class="heading1">' + serie.data[0][1].toFixed(1) + '</h1></td><td class="second-td">' + serie.name + '<br><span class="latest-date">' + d + '</span></td></tr>';
-				if((i+1) < series.length && series[(i+1)].data[0][0] < ((new Date().getTime()) - 86400000) && !spacerAdded) {
+				if((i) < series.length && series[(i)].data[0][0] < ((new Date().getTime()) - 86400000) && !spacerAdded) {
 					//tableStr += '<tr><td class="latest-spacer"></td><td class="latest-spacer"></td></tr>';
 					spacerAdded = true;
 					colorClass = 'header-gray';

@@ -20,11 +20,11 @@ SET SQL_MODE="NO_AUTO_VALUE_ON_ZERO";
 --
 
 CREATE TABLE IF NOT EXISTS `readings` (
-  `sensor` int NOT NULL,
+  `sensor_id` int NOT NULL,
   `date` datetime NOT NULL,
   `temp` float NOT NULL,
-  PRIMARY KEY (`sensor`, `date`),
-  KEY `Index_1` (`sensor`, `date`)
+  PRIMARY KEY (`sensor_id`, `date`),
+  KEY `Index_1` (`sensor_id`, `date`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
