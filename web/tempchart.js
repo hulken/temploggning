@@ -1,39 +1,59 @@
+/* TempChart
+ *
+ *
+ */
+
 var TempChart = TempChart || 
 
 	/* Constructor
-	 *
+	 * @param 	options 	object 		configuration object to override default configuration
 	 */
-	function(mainElementId, controlsElementId, options) {
+	function(options) {
+		// Store configuration options
 		$.extend(this,options);
+		console.log(this);
+		// Set highcharts defautls
 		Highcharts.setOptions({
 		    global: {
 		        useUTC: false
 		    }
 		});
 
-		this.mainElementId = mainElementId;
-		this.$mainElement = $('#' + mainElementId);
+		// Get main elements
+		this.$mainElement = $('#' + this.MAIN_ELEMENT_ID);
+		this.$controlsElement = $('#' + this.CONTROLS_ELEMNT_ID);
 
-		this.controlsElementId = controlsElementId;
-		this.$controlsElement = $('#' + controlsElementId);
-
+		// Bind GUI and APP events
 		this.bindEvents();
 
+		// Initiate sensor load
 		this.loadSensors();
-
 	};
 
 TempChart.prototype = {
 
 	// Constants
 	// ---------------
-	URL: 'getdata.php',
-	USE_CACHE: true,
+	DATA_URL: 'data', // URL to load data from
+	USE_CACHE: true, // Use serverside json-cache
+	MAIN_ELEMENT_ID: 'graph', // Main graph html element id
+	CONTROLS_ELEMNT_ID: 'controls', // Controls html element id
+	LINE_COLORS: [
+		'#4572A7', 
+		'#AA4643', 
+		'#89A54E', 
+		'#80699B', 
+		'#3D96AE', 
+		'#DB843D', 
+		'#92A8CD', 
+		'#A47D7C', 
+		'#B5CA92'
+	], // Default line colors, overriden if server data contains colors
 
 	// Varibles
 	// ---------------
-	mainElementId: null,
 	$mainElement: null,
+	$controlsElement: null,
 	chart: null,
 	sensors: [],
 	refreshIntervalId: null,
@@ -41,12 +61,15 @@ TempChart.prototype = {
 	// Methods
 	// ---------------
 
+
+	/* bindEvents
+	 *
+	 */
 	bindEvents: function() {
 		var me = this;
 		$(document).bind('TempChart_sensors_loaded', function(e, sensors) { me.loadView() });
 		$(document).bind('TempChart_in_progress', function(e, show) { me.setLoadingMessage(show); });
 		$(document).bind('TempChart_data_loaded', function(e, series, period) {
-
 			if(period === 'latest') {
 				me.visualizeSingleValuesView(series);
 			} else {
@@ -74,14 +97,17 @@ TempChart.prototype = {
 		
 	},
 
+	/* loadView
+	 *
+	 */
 	loadView: function() {
 
 		this.stopAutoRefresh();
 		var period = this._getPeriod();
 		if(period === 'compare') {
-			this.createCompareView();
+			this._createCompareView();
 		} else if(period === 'custom') {
-			this.createCustomView();
+			this._createCustomView();
 		} else {
 			this.startAutoRefresh();
 			this.$controlsElement.html('');
@@ -89,12 +115,12 @@ TempChart.prototype = {
 		}
 	},
 
-	/* loadData
+	/* loadSensors
 	 *
 	 */
 	loadSensors: function() {
 		var me = this;
-		$.getJSON(this.URL,	function(sensors) {
+		$.getJSON(this.DATA_URL,	function(sensors) {
 			me.sensors = sensors;
 			$(document).trigger('TempChart_sensors_loaded', [sensors]);
 		});
@@ -102,6 +128,9 @@ TempChart.prototype = {
 
 	/* loadData
 	 *	@param 	sensors 	array		string array containing senornames
+	 *  @param  period 		string 		named period to load data from
+	 *  @param  from 		datetime 	load data from this datetime
+	 *  @param  to 			datetime 	load data to this datetime
 	 */
 	loadData: function(sensors, period, from, to) {
 		$(document).trigger('TempChart_in_progress', [true]);
@@ -117,7 +146,7 @@ TempChart.prototype = {
 			if(typeof period !== 'undefined' && period !== null) { params.period = period; }
 			if(from) { 	 params.from = from; }
 			if(to) { 	 params.to = to; } 
-			$.getJSON(me.URL + '?' + $.param(params), function(data) {
+			$.getJSON(me.DATA_URL + '?' + $.param(params), function(data) {
 
 				series.push({
 					name: sensor.name.substr(0,1).toUpperCase() + sensor.name.substr(1),
@@ -137,17 +166,25 @@ TempChart.prototype = {
 	
 	},
 
+	/* setLoadingMessage
+	 * @param 		show 	boolean 	show loading message or not
+	 */
 	setLoadingMessage: function(show) {
 		$('#loading').modal(show ? 'show' : 'hide');
 	},
 
+	/* updateData
+	 * @param 		dataArray 		array 		update highcharts data
+	 */
 	updateData: function(dataArray) {
 		$.each(this.chart.series, function(i, serie) {
 			serie.setData(dataArray[serie.name]);
 		});
 	},
 
-
+	/* visualizeSingleValuesView
+	 * @param 	series 		array 		highcharts data series array
+	 */
 	visualizeSingleValuesView: function(series) {
 		var me = this;
 		me._sortSeries(series);
@@ -174,26 +211,20 @@ TempChart.prototype = {
 		$(document).trigger('TempChart_in_progress', [false]);
 	},
 
+	/* createChartView
+	 * 
+	 * @param 	series 		array 		highcharts data series array
+	 *
+	 */
 	createChartView: function(series) {
-
+		var me = this;
         this.chart = new Highcharts.Chart({
         	credits: { enabled: false },
             chart: {
-                renderTo: this.mainElementId,
+                renderTo: this.MAIN_ELEMENT_ID,
                 type: 'spline'
-                //,zoomType: 'x'
             },
-            colors: [
-				'#4572A7', 
-				'#AA4643', 
-				'#89A54E', 
-				'#80699B', 
-				'#3D96AE', 
-				'#DB843D', 
-				'#92A8CD', 
-				'#A47D7C', 
-				'#B5CA92'
-			],
+            colors: me.LINE_COLORS,
             title: {
                 text: ''
             },
@@ -260,7 +291,30 @@ TempChart.prototype = {
 		$(document).trigger('TempChart_in_progress', [false]);
 	},
 
-	createCustomView: function() {
+	/* startAutoRefresh
+	 * 
+	 */
+	startAutoRefresh: function() {
+		var me = this;
+		me.refreshIntervalId = setInterval(function() {
+			if((new Date()).getMinutes() % 5 === 0) {
+				me.loadView();
+			}
+		}, 60000);
+	},
+
+	/* stopAutoRefresh
+	 * 
+	 */
+	stopAutoRefresh: function() {
+		clearInterval(this.refreshIntervalId);
+	},
+
+
+	/* _createCustomView
+	 * 
+	 */
+	_createCustomView: function() {
 		this.$mainElement.html('');
 		var d = new Date();
 		var str = '<div class="well">' + 
@@ -295,7 +349,11 @@ TempChart.prototype = {
 	    });
 	},
 
-	createCompareView: function() {
+
+	/* _createCompareView
+	 * DEPRECATED, needs to be updated to Boostrap 3 html syntax
+	 */
+	_createCompareView: function() {
 		this.$mainElement.html('');
 		var d = new Date();
 		var str = '<div class="well">' + 
@@ -359,19 +417,10 @@ TempChart.prototype = {
 		
 	},
 
-	startAutoRefresh: function() {
-		var me = this;
-		me.refreshIntervalId = setInterval(function() {
-			if((new Date()).getMinutes() % 5 === 0) {
-				me.loadView();
-			}
-		}, 60000);
-	},
-
-	stopAutoRefresh: function() {
-		clearInterval(this.refreshIntervalId);
-	},
-
+	/* _sortSeries
+	 * @param 	series 		array 		highcharts data series array
+	 * @param 	by 			string 		optionial, none or name is implemented
+	 */
 	_sortSeries: function(series, by) { 
 		var x, y, holder; 
 		// The Bubble Sort method. 
@@ -390,19 +439,16 @@ TempChart.prototype = {
 		}
 	},
 
+	/* _getPeriod
+	 * 
+	 */
 	_getPeriod: function() {
 		var hash = window.location.hash;
 		$('.nav-opt').removeClass('active');
 		$(hash === '' ? '#latest': hash).addClass('active'); // Set menu item to active, or activate start item aka latest
 		switch(hash) {
-			case '#custom': 
-				return 'custom';
-				break;
-			case '#compare': 
-				return 'compare';
-				break;				
-			case '#latest': 
-				return 'latest';
+			case '#custom','#compare','#latest': 
+				return hash.replace('#');
 				break;
 			case '#day': 
 				return 1;

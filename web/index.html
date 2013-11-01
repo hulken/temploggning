@@ -164,7 +164,12 @@
     <script>
       var tempChart = null;
       $(function() {
-          tempChart = new TempChart('graph','controls', {URL: 'data/getdata.php'});
+          tempChart = new TempChart({
+            MAIN_ELEMENT_ID: 'graph',
+            CONTROLS_ELEMNT_ID: 'controls',
+            DATA_URL: 'data/getdata.php',
+            USE_CACHE: true
+          });
 /*
           $('#container').on('swipeleft', function(e) {
             console.log(e);
