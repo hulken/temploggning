@@ -3,14 +3,22 @@
 import datetime;
 import time;
 import ow;
-import sys, getopt, httplib, urllib, json, os
+import sys, getopt, httplib, urllib, json, os    
 
-def printUsage():
-  print("Usage: %s [ options ]" % sys.argv[0])       
+def _getSensors():
+  # Connect to owserver
+  ow.init('localhost:4304')
+  # Get sensor list
+  response = ow.Sensor('/').sensorList()
+  # ow clean up
+  #ow.finish()
+  return response
 
 def listSensors():
-  ow.init('localhost:4304')
-  response = ow.Sensor('/').sensorList()
+  # Get sensor list
+  response = _getSensors()
+
+  # Parse senors
   parsedSensors = { 'sensor': [] }
   for sensor in response:
     
@@ -31,11 +39,13 @@ def listSensors():
 
     if(sensor.type in ['DS18B20', 'DS18S20']):
       parsedSensors['sensor'].append({'id': sensor.address, 'name': sensor.id})
+  
+
   return parsedSensors
 
 def infoSensor(sensorId):
-  ow.init('localhost:4304')
-  response = ow.Sensor('/').sensorList()
+  # Get sensor list
+  response = _getSensors()
   parsedInfo = { 'lastUpdated': int(time.time()), 'data': [] }
   for sensor in response:
     if(sensor.address == sensorId):

@@ -3,7 +3,8 @@ var TempChart = TempChart ||
 	/* Constructor
 	 *
 	 */
-	function(mainElementId, controlsElementId) {
+	function(mainElementId, controlsElementId, options) {
+		$.extend(this,options);
 		Highcharts.setOptions({
 		    global: {
 		        useUTC: false
@@ -154,7 +155,7 @@ TempChart.prototype = {
 		
 		var spacerAdded = false;
 		var colorClass = 'header-black';
-		var tableStr = '<table class="table latest-table"><tbody>';
+		var tableStr = '<table class="table latest-table table-responsive"><tbody>';
 		$.each(series, function(i, serie) {
 			if (serie.data.length > 0) {
 				d = Highcharts.dateFormat('%Y.%m.%d %H:%M', new Date(serie.data[0][0]));
@@ -263,26 +264,25 @@ TempChart.prototype = {
 		this.$mainElement.html('');
 		var d = new Date();
 		var str = '<div class="well">' + 
-				'<form id="customView" class="form-horizontal">' +
-				'<div class="control-group">' +
-				'<label class="control-label" for="fromdatetime">Fr&aring;n</label>' +
-				'<div class="controls">' +
-		 			'<div class="input-append date datetimepicker">' +
-			   			'<input id="fromdatetime" data-format="yyyy-MM-dd hh:mm" type="text" value="' + Highcharts.dateFormat('%Y-%m-%d %H:%M', d.setDate(d.getDate() - 1)) + '"></input>' +
-			    		'<span class="add-on">' +
-			      			'<i data-time-icon="icon-time" data-date-icon="icon-calendar"></i>' +
-			      		'</span>' +
-		      		'</div>' +
-	  			'</div>' +
-	  			'<label class="control-label" for="todatetime">Till</label>' +
-	  			'<div class="controls">' +
-		  			'<div class="input-append date datetimepicker">' +
-			   			'<input id="todatetime" data-format="yyyy-MM-dd hh:mm" type="text" value="' + Highcharts.dateFormat('%Y-%m-%d %H:%M', new Date()) + '"></input>' +
-			    		'<span class="add-on">' +
-			      			'<i data-time-icon="icon-time" data-date-icon="icon-calendar"></i>' +
-			      		'</span>' +
-		      		'</div>' +
-	  			'</div>' +
+				'<form id="customView" class="form-inline">' +
+				'<div class="form-group">' +
+					'<label class="col-sm-2 control-label" for="fromdatetime">Fr&aring;n</label>' +
+					'<div class="controls col-sm-10">' +
+			 			'<div class="input-group date datetimepicker">' +
+				   			'<input class="form-control" id="fromdatetime" data-format="yyyy-MM-dd hh:mm" type="text" value="' + Highcharts.dateFormat('%Y-%m-%d %H:%M', d.setDate(d.getDate() - 1)) + '"></input>' +
+				    		'<span class="input-group-addon"><span class="glyphicon glyphicon-calendar"></span>' +
+			      		'</div>' +
+		  			'</div>' +
+		  		'</div>' +
+		  		'<div class="form-group">' +
+		  			'<label class="col-sm-2 control-label" for="todatetime">Till</label>' +
+		  			'<div class="controls col-sm-10">' +
+			  			'<div class="input-group date datetimepicker">' +
+				   			'<input class="form-control" id="todatetime" data-format="yyyy-MM-dd hh:mm" type="text" value="' + Highcharts.dateFormat('%Y-%m-%d %H:%M', new Date()) + '"></input>' +
+				    		'<span class="input-group-addon"><span class="glyphicon glyphicon-calendar"></span>' +
+			      		'</div>' +
+		  			'</div>' +
+		  		'</div>' +
 				'<button type="submit" class="btn">Uppdatera</button>' + 
 			'</div>' +
 			'</div>' +
@@ -290,7 +290,8 @@ TempChart.prototype = {
 		this.$controlsElement.html(str);
 		$('.datetimepicker').datetimepicker({
 	      language: 'pt-BR',
-	      pickSeconds: false
+	      pickSeconds: false,
+	      pick12HourFormat: false
 	    });
 	},
 

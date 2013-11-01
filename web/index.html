@@ -16,15 +16,11 @@
 
     <!-- Le styles -->
     <link href="lib/bootstrap/css/bootstrap.min.css" rel="stylesheet">
-    <link href="lib/bootstrap/css/bootstrap-responsive.min.css" rel="stylesheet">
+    <link href="lib/bootstrap/css/bootstrap-theme.min.css" rel="stylesheet">
     <link href="lib/bootstrap-datetimepicker/css/bootstrap-datetimepicker.min.css" rel="stylesheet">
     <style>
 
-      @media (min-width: 979px) { 
-        body {
-          padding-top: 60px; /* 60px to make the container go all the way to the bottom of the topbar */
-        }
-      }
+      
 
       .modal { position: absolute; }
       
@@ -32,8 +28,8 @@
         font-size: 4.7em;
       }
 
-      .table th, .table td { 
-        border-top: none; 
+      table, tbody, .table tr, .table th, .table td { 
+        border: none !important;
       }
 
       .latest-table tr {
@@ -50,8 +46,9 @@
         width: 50%;
         vertical-align: bottom; 
         padding-left: 0px;
-        padding-bottom: 11px; 
+        padding-bottom: 27px; 
         font-size: 16px;
+        line-height: 1;
       }
 
       .latest-date {
@@ -64,6 +61,32 @@
 
       .latest-table .header-gray {
         color: rgb(143, 142, 142);
+      }
+
+      .input-group.date {
+        width: 180px;
+      }
+
+      .navbar-inverse {
+        background-color: #222;
+        background-image: none;
+      }
+
+      .navbar-inverse .navbar-nav>.active>a {
+        background-color: #444;
+        background-image: none; 
+      }
+
+      .navbar-inverse .navbar-brand {
+        color: #FFF;
+      }
+
+      .navbar-inverse .navbar-brand, .navbar-inverse .navbar-nav>li>a {
+        text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.25);
+      }
+
+      h1 {
+        margin-top: 10px;
       }
     </style>
     <!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
@@ -82,35 +105,45 @@
 
   <body>
 
-    <div class="navbar navbar-inverse navbar-fixed-top">
-        <div class="navbar-inner">
-          <div class="container">
-              <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-              </a>
-              <a href="#" id="refreshButton" class="btn btn-inverse btn-small" style="float: right;"><i class="icon-refresh icon-white"></i></a>
-              <a class="brand" href="#">Temperaturer</a>
-              <div class="nav-collapse collapse">
-                <ul class="nav">
-                    <li id="latest" data-toggle="collapse" data-target=".nav-collapse" class="nav-opt"><a href="#latest">Senaste</a></li>
-                    <li id="day" data-toggle="collapse" data-target=".nav-collapse" class="nav-opt"><a href="#day">Dygn</a></li>
-                    <li id="week" data-toggle="collapse" data-target=".nav-collapse" class="nav-opt"><a href="#week">Vecka</a></li>
-                    <li id="month" data-toggle="collapse" data-target=".nav-collapse" class="nav-opt"><a href="#month">M&aring;nad</a></li>
-                    <li id="year" data-toggle="collapse" data-target=".nav-collapse" class="nav-opt"><a href="#year">&Aring;r</a></li>
-                    <!-- <li id="compare" data-toggle="collapse" data-target=".nav-collapse" class="nav-opt"><a href="#compare">J&auml;mf&ouml;r</a></li> -->
-                    <li id="custom" data-toggle="collapse" data-target=".nav-collapse" class="nav-opt"><a href="#custom">Valfritt</a></li>
-                </ul>
-            </div>
+    <div class="navbar navbar-inverse navbar-static-top">
+      <div class="container">
+        <div class="navbar-header">
+          <a class="navbar-brand" href="#">Temperaturer</a>
+
+          <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+        </div>
+       
+        <div class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+            <li id="latest" class="nav-opt"><a href="#latest">Senaste</a></li>
+            <li id="day" class="nav-opt"><a href="#day">Dygn</a></li>
+            <li id="week" class="nav-opt"><a href="#week">Vecka</a></li>
+            <li id="month" class="nav-opt"><a href="#month">M&aring;nad</a></li>
+            <li id="year" class="nav-opt"><a href="#year">&Aring;r</a></li>
+            <!-- <li id="compare" class="nav-opt"><a href="#compare">J&auml;mf&ouml;r</a></li> -->
+            <li id="custom" class="nav-opt"><a href="#custom">Valfritt</a></li>
+          </ul>
+          <ul class="nav navbar-nav navbar-right">
+            <li>
+              <a href="#"><span class="glyphicon glyphicon-refresh"></span></a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div id="loading" class="modal">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-body text-center">
+            <img src="loader.gif"/>
+            <p></p>
+            <p>Laddar...</p>
           </div>
         </div>
-    </div>
-    <div id="loading" class="modal hide">
-      <div class="modal-body text-center">
-        <img src="loader.gif"/>
-        <p></p>
-        <p>Laddar...</p>
       </div>
     </div>
     <div class="container" id="container">
@@ -131,7 +164,7 @@
     <script>
       var tempChart = null;
       $(function() {
-          tempChart = new TempChart('graph','controls');
+          tempChart = new TempChart('graph','controls', {URL: 'data/getdata.php'});
 /*
           $('#container').on('swipeleft', function(e) {
             console.log(e);
