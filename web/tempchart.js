@@ -11,7 +11,7 @@ var TempChart = TempChart ||
 	function(options) {
 		// Store configuration options
 		$.extend(this,options);
-		console.log(this);
+		
 		// Set highcharts defautls
 		Highcharts.setOptions({
 		    global: {
