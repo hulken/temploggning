@@ -1,8 +1,10 @@
 <!DOCTYPE html>
 <html lang="se">
   <head>
-    <meta charset="utf-8">
+    
     <title>Temperaturer - hultman.no-ip.org</title>
+<!-- META TAGS START -->
+    <meta charset="utf-8">
     <meta http-equiv="Content-Language" content="sv">
     <meta http-equiv="cleartype" content="on">
     <meta http-equiv="imagetoolbar" content="no">
@@ -10,101 +12,36 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="description" content="Temperature logging in Stigtomta">
+    <meta name="description" content="Temperature logging visualization client">
     <meta name="author" content="Martin Hultman 2013">
+<!-- META TAGS END -->
 
-
-    <!-- Le styles -->
+<!-- STYLES START -->
     <link href="lib/bootstrap/css/bootstrap.min.css" rel="stylesheet">
     <link href="lib/bootstrap/css/bootstrap-theme.min.css" rel="stylesheet">
     <link href="lib/bootstrap-datetimepicker/css/bootstrap-datetimepicker.min.css" rel="stylesheet">
-    <style>
+    <link href="resources/style.css" rel="stylesheet">
+<!-- STYLES END -->
 
-      
-
-      .modal { position: absolute; }
-      
-      .heading1 {
-        font-size: 4.7em;
-      }
-
-      table, tbody, .table tr, .table th, .table td { 
-        border: none !important;
-      }
-
-      .latest-table tr {
-        padding-bottom: 23px;
-      }
-
-      .latest-table .first-td {
-        width: 50%;
-        min-width: 175px; 
-        text-align: right;
-      }
-
-      .latest-table .second-td {
-        width: 50%;
-        vertical-align: bottom; 
-        padding-left: 0px;
-        padding-bottom: 27px; 
-        font-size: 16px;
-        line-height: 1;
-      }
-
-      .latest-date {
-        font-size: 11px;
-      }
-
-      .latest-spacer {
-        height: 0px;
-      }
-
-      .latest-table .header-gray {
-        color: rgb(143, 142, 142);
-      }
-
-      .input-group.date {
-        width: 180px;
-      }
-
-      .navbar-inverse {
-        background-color: #222;
-        background-image: none;
-      }
-
-      .navbar-inverse .navbar-nav>.active>a {
-        background-color: #444;
-        background-image: none; 
-      }
-
-      .navbar-inverse .navbar-brand {
-        color: #FFF;
-      }
-
-      .navbar-inverse .navbar-brand, .navbar-inverse .navbar-nav>li>a {
-        text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.25);
-      }
-
-      h1 {
-        margin-top: 10px;
-      }
-    </style>
-    <!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
+<!-- HTML5 shim START, for IE6-8 support of HTML5 elements -->
     <!--[if lt IE 9]>
       <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
+<!-- HTML5 shim END -->
 
-    <!-- Le fav and touch icons 
+<!-- FAV AND TOUCH ICONS START -->
+<!--
     <link rel="shortcut icon" href="../assets/ico/favicon.ico">
     <link rel="apple-touch-icon-precomposed" sizes="144x144" href="../assets/ico/apple-touch-icon-144-precomposed.png">
     <link rel="apple-touch-icon-precomposed" sizes="114x114" href="../assets/ico/apple-touch-icon-114-precomposed.png">
     <link rel="apple-touch-icon-precomposed" sizes="72x72" href="../assets/ico/apple-touch-icon-72-precomposed.png">
     <link rel="apple-touch-icon-precomposed" href="../assets/ico/apple-touch-icon-57-precomposed.png">
 -->
+<!-- FAV AND TOUCH ICONS END -->
   </head>
 
   <body>
-
+<!-- NAVBAR START -->
     <div class="navbar navbar-inverse navbar-static-top">
       <div class="container">
         <div class="navbar-header">
@@ -129,55 +66,72 @@
           </ul>
           <ul class="nav navbar-nav navbar-right">
             <li>
-              <a href="#"><span class="glyphicon glyphicon-refresh"></span></a>
+              <a href="#" id="refreshButton"><span class="glyphicon glyphicon-refresh"></span></a>
             </li>
           </ul>
         </div>
       </div>
     </div>
+<!-- NAVBAR END -->
+
+<!-- MODAL START -->
     <div id="loading" class="modal">
       <div class="modal-dialog">
         <div class="modal-content">
           <div class="modal-body text-center">
-            <img src="loader.gif"/>
+            <img src="resources/loader.gif"/>
             <p></p>
             <p>Laddar...</p>
           </div>
         </div>
       </div>
     </div>
+
+    <div id="error" class="modal">
+      <div class="modal-dialog">
+        <div class="modal-content alert-danger">
+           <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+            <h4 class="modal-title">Fel</h4>
+          </div>
+          <div class="modal-body text-center">
+          </div>
+        </div>
+      </div>
+    </div>
+<!-- MODAL END -->    
+
+<!-- MAIN CONTAINER START -->    
     <div class="container" id="container">
       <div id="controls"></div>
       <div id="graph" style="height: 400px; margin: 0 auto"></div>
     </div> 
+<!-- MAIN CONTAINER END -->    
 
-    <script src="lib/jquery-1.8.3.min.js"></script>
-    <!--<script src="lib/jquery.event.move.js"></script
-    <script src="lib/jquery.event.swipe.js"></script>-->
+<!-- SCRIPTS START -->    
+    <script src="lib/jquery-1.10.2.min.js"></script>
     <script src="lib/bootstrap/js/bootstrap.min.js"></script>
     <script src="lib/bootstrap-datetimepicker/js/bootstrap-datetimepicker.min.js"></script>
-    <script src="lib/highcharts-3.0beta.js"></script>
-    <script src="lib/highcharts-more-3.0beta.js"></script>
-    <script src="lib/exporting-3.0beta.js"></script>
+    <script src="lib/highcharts/highcharts.js"></script>
+    <script src="lib/highcharts/highcharts-more.js"></script>
+    <script src="lib/highcharts/exporting.js"></script>
     <script src="Tempchart.js"></script>
 
     <script>
       var tempChart = null;
+
       $(function() {
+
+          // Init new TempChart
           tempChart = new TempChart({
             MAIN_ELEMENT_ID: 'graph',
             CONTROLS_ELEMNT_ID: 'controls',
             DATA_URL: 'data',
             USE_CACHE: true
           });
-/*
-          $('#container').on('swipeleft', function(e) {
-            console.log(e);
-          }).on('swiperight', function(e) {
-            console.log(e);
-          });*/
+
       });
     </script>
-
+<!-- SCRIPTS END -->    
   </body>
 </html>

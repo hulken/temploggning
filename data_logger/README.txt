@@ -41,14 +41,21 @@
         token = <value_of_token>
         tokenSecret = <value_of_token_secret>
 
-## LogTellstickToDatabase.py
+## owsens.py
+    Make sure the owpython library is installed (http://owfs.sourceforge.net/owpython.html)
+    For raspberry pi installation follow instructions found here http://wiki.temperatur.nu/index.php/OWFS_p%C3%A5_Rasperry_Pi
+
+
+## LogToDatabase.py
     Make sure the correct python libraries are installed
      pip install mysql-connector-python
      
-    Review the mysql host settings in LogTellstickToDatabase.py file (host, user, password, database)
+    Review the mysql host settings in logToDatabase.conf file:
+     Most important is the type of logger_type!
+     And also database: host, user, password, database
     
     Run the script (Prerequisites: The database table schema (v2) need to be in place before running the script)
-     ./LogTellstickToDatabase.py
+     ./LogToDatabase.py
     
     If everyting works properly, I recommend to create a CRON-job to run the collection of the sensor values periodically in order to store them to yor database. I'm fetching values every 5th minute (The script does not update the database unless the read datetime from tellstick have changed. The API only updates the value every 10 minute currently):
-     0-59/5 * * * *  xenon   /home/xenon/tellstick/LogTellstickToDatabase.py
+     0-59/5 * * * *  xenon   /home/xenon/data_logger/LogToDatabase.py

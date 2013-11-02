@@ -21,10 +21,10 @@ from configobj import ConfigObj
 config = ConfigObj('logToDatabase.conf')
 if(config is not None):
     # Select logger type
-    if(config["logtype"] == "tellstick"):
+    if(config["logger_type"] == "tellstick"):
         import tdsens
         logger = tdsens
-    elif(config["logtype"] == "1wire"):
+    elif(config["logger_type"] == "1wire"):
         import owsens
         logger = owsens
 

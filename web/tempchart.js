@@ -11,7 +11,7 @@ var TempChart = TempChart ||
 	function(options) {
 		// Store configuration options
 		$.extend(this,options);
-		
+
 		// Set highcharts defautls
 		Highcharts.setOptions({
 		    global: {
@@ -48,7 +48,7 @@ TempChart.prototype = {
 		'#92A8CD', 
 		'#A47D7C', 
 		'#B5CA92'
-	], // Default line colors, overriden if server data contains colors
+	], // Default line colors, overridden if server data contains colors
 
 	// Varibles
 	// ---------------
@@ -67,8 +67,9 @@ TempChart.prototype = {
 	 */
 	bindEvents: function() {
 		var me = this;
+		$(document).bind('TempChart_error', function(e, msg, xhr) { me.showErrorMessage(msg) });
 		$(document).bind('TempChart_sensors_loaded', function(e, sensors) { me.loadView() });
-		$(document).bind('TempChart_in_progress', function(e, show) { me.setLoadingMessage(show); });
+		$(document).bind('TempChart_in_progress', function(e, show) { me.showLoadingMessage(show); });
 		$(document).bind('TempChart_data_loaded', function(e, series, period) {
 			if(period === 'latest') {
 				me.visualizeSingleValuesView(series);
@@ -81,10 +82,10 @@ TempChart.prototype = {
 			me.loadView();
 		};
 
-
-		$('#customView').live('submit',function(e) {
+		$(document).on('submit','#customView',function(e) {
 		 // console.log((((new Date($('#todatetime').val() + ':00')).getTime()/1000) - ((new Date($('#fromdatetime').val() + ':00')).getTime()/1000))/60/60/24);
 		  me.loadData(me.sensors, null, ((new Date($('#fromdatetime').val() + ':00')).getTime()/1000), ((new Date($('#todatetime').val() + ':00')).getTime()/1000))
+		  e.preventDefault();
 		  return false;
 		});
 
@@ -101,7 +102,6 @@ TempChart.prototype = {
 	 *
 	 */
 	loadView: function() {
-
 		this.stopAutoRefresh();
 		var period = this._getPeriod();
 		if(period === 'compare') {
@@ -120,7 +120,9 @@ TempChart.prototype = {
 	 */
 	loadSensors: function() {
 		var me = this;
-		$.getJSON(this.DATA_URL,	function(sensors) {
+		me._doRequest({
+				url: this.DATA_URL
+		},function(sensors) {
 			me.sensors = sensors;
 			$(document).trigger('TempChart_sensors_loaded', [sensors]);
 		});
@@ -146,31 +148,41 @@ TempChart.prototype = {
 			if(typeof period !== 'undefined' && period !== null) { params.period = period; }
 			if(from) { 	 params.from = from; }
 			if(to) { 	 params.to = to; } 
-			$.getJSON(me.DATA_URL + '?' + $.param(params), function(data) {
+			me._doRequest({
+				url: me.DATA_URL + '?' + $.param(params)
+			},function(data) {
+				
+					series.push({
+						name: sensor.name.substr(0,1).toUpperCase() + sensor.name.substr(1),
+						color: sensor.color,
+						data: data
+					});
 
-				series.push({
-					name: sensor.name.substr(0,1).toUpperCase() + sensor.name.substr(1),
-					color: sensor.color,
-					data: data
-				});
+					seriesCounter++;
 
-				seriesCounter++;
-
-				if (seriesCounter == sensors.length) { // All data is loaded
-					me._sortSeries(series,'name');
-					$(document).trigger('TempChart_data_loaded', [series, period]);
-				}
+					if (seriesCounter == sensors.length) { // All data is loaded
+						me._sortSeries(series,'name');
+						$(document).trigger('TempChart_data_loaded', [series, period]);
+					}
 			});
 		});
 		
 	
 	},
 
-	/* setLoadingMessage
+	/* showLoadingMessage
 	 * @param 		show 	boolean 	show loading message or not
 	 */
-	setLoadingMessage: function(show) {
+	showLoadingMessage: function(show) {
 		$('#loading').modal(show ? 'show' : 'hide');
+	},
+
+	/* showErrorMessage
+	 * @param 		message 	string 		error message to display
+	 */
+	showErrorMessage: function(message) {
+		$('#error .modal-body').html(message);
+		$('#error').modal('show');
 	},
 
 	/* updateData
@@ -311,6 +323,21 @@ TempChart.prototype = {
 	},
 
 
+	_doRequest: function(options, callback) {
+		$.ajax(
+			$.extend({dataType: 'json'},options))
+			.done(function(data) {
+				if(typeof data === 'object') {
+					callback(data);
+				} else {
+					$(document).trigger('TempChart_error', ['Inget data returnerades från servern.']);	
+				}
+			})
+			.fail(function(jqXHR, textStatus, errorThrown) {
+    			$(document).trigger('TempChart_error', [textStatus + ' ' + errorThrown, jqXHR]);
+    		});
+	},
+
 	/* _createCustomView
 	 * 
 	 */
@@ -447,8 +474,10 @@ TempChart.prototype = {
 		$('.nav-opt').removeClass('active');
 		$(hash === '' ? '#latest': hash).addClass('active'); // Set menu item to active, or activate start item aka latest
 		switch(hash) {
-			case '#custom','#compare','#latest': 
-				return hash.replace('#');
+			case '#custom':
+			case '#compare':
+			case '#latest': 
+				return hash.replace('#','');
 				break;
 			case '#day': 
 				return 1;
