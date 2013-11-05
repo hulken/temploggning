@@ -15,6 +15,7 @@ class Settings
 {
 	// Database schema version
 	const DB_SCHEMA_VERSION = 2;
+    const CACHE_DIR = 'cacheData/'; // Note: This must end with a forward-slash in unix and backward slash in windows
 }
 
 function sqlerr($file = '', $line = '')

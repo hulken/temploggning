@@ -125,7 +125,7 @@ $arr = Array();
 echo $outStr;
 
 function getCacheFileName($from, $period) {
-	return 'cacheData/' . $from . '_' . $period;
+	return Settings::CACHE_DIR . $from . '_' . $period;
 }
 
 function getCacheFileNameSufix($period) {
@@ -149,6 +149,20 @@ function readCache($from, $period) {
 }
 
 function writeCache($from, $period, $data) {
+    // Try to create the directory first
+    if (!is_dir(Settings::CACHE_DIR)) {
+        $currentErrorReporting = ini_get('display_errors');
+        
+        ini_set('display_errors', '0');
+        
+        if (!mkdir(Settings::CACHE_DIR)) { // We probably don't have access to create the directory
+            ini_set('display_errors', $currentErrorReporting);
+            return;
+        }
+        
+        ini_set('display_errors', $currentErrorReporting);
+    }
+
 	$fileNamePrefix = getCacheFileName($from, $period);
 	$fileName = getCacheFileName($from, $period) . '_' . getCacheFileNameSufix($period);
 	
