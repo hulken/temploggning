@@ -58,7 +58,7 @@ $arr = Array();
 		if(isset($_GET['period']) && $_GET['period'] == 'latest') { // Latest readings
             $query = "SELECT UNIX_TIMESTAMP(i.date) AS date, i.sensor_id, r.temp, s.name, s.color FROM readings r"
                         . " RIGHT JOIN ("
-                        . " SELECT MAX(date) AS date, sensor_id FROM readings GROUP BY sensor_id ORDER BY date DESC"
+                        . " SELECT MAX(date) AS date, sensor_id FROM readings GROUP BY sensor_id"
                         . " ) AS i ON i.date = r.date AND i.sensor_id = r.sensor_id"
                         . " RIGHT JOIN sensors s ON s.sensor_id = r.sensor_id"
                         . " ORDER BY sensor_id, date ASC";
@@ -66,7 +66,7 @@ $arr = Array();
 		else { // List of readings
                 $query = "SELECT UNIX_TIMESTAMP(i.date) AS date, i.sensor_id, r.temp, s.name, s.color FROM readings r"
                         . " RIGHT JOIN ("
-                        . " SELECT date, sensor_id FROM readings WHERE $where $groupby ORDER BY date DESC"
+                        . " SELECT date, sensor_id FROM readings WHERE $where $groupby"
                         . " ) AS i ON i.date = r.date AND i.sensor_id = r.sensor_id"
                         . " RIGHT JOIN sensors s ON s.sensor_id = r.sensor_id"
                         . " ORDER BY sensor_id, date ASC";
