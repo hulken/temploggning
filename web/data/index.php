@@ -3,8 +3,8 @@ include_once("settings.php");
 
 $arr = Array();
 
-if(isset($_GET['sensor'])) {	
-	$sensor = $_GET['sensor'];
+{	
+	//$sensor = $_GET['sensor'];
 	$groupby = "";
 	$from = 0;
 	
@@ -51,63 +51,96 @@ if(isset($_GET['sensor'])) {
     }
     
 	//Try to read from cache
-	if(isset($_GET['usecache']) && $_GET['usecache'] == "true") 
-	{
-		$outStr = readCache($sensor, $from, $period);
-	}
+	//if(isset($_GET['usecache']) && $_GET['usecache'] == "true") 
+	//{
+	//	$outStr = readCache($sensor, $from, $period);
+	//}
 	
 	if(!isset($outStr) || !$outStr) 
 	{
 		if(isset($_GET['period']) && $_GET['period'] == 'latest') {
-			$query = "SELECT UNIX_TIMESTAMP(date) AS date, temp FROM " . getReadingsDbTableName($sensor) . " WHERE " . getWhereStatementLatest($sensor, $where) . ";";
+            $query = "SELECT UNIX_TIMESTAMP(i.date) AS date, i.sensor_id, temp, s.name, s.color FROM readings r"
+                        . " RIGHT JOIN ("
+                        . " SELECT MAX(date) AS date, sensor_id FROM readings GROUP BY sensor_id ORDER BY date DESC"
+                        . " ) AS i ON i.date = r.date AND i.sensor_id = r.sensor_id"
+                        . " RIGHT JOIN sensors s ON s.sensor_id = r.sensor_id"
+                        . " ORDER BY sensor_id, date ASC";
 		}
 		else {
             if ($period >= 7) {
-                $query = "SELECT UNIX_TIMESTAMP(MIN(date)) AS date, AVG(temp) AS temp FROM " . getReadingsDbTableName($sensor) . " WHERE $where " . getWhereStatementPeriod($sensor, '') . " $groupby ORDER BY $order";
+                $query = "SELECT UNIX_TIMESTAMP(MIN(date)) AS date, AVG(temp) AS temp FROM readings WHERE $where $groupby ORDER BY $order";
             }
             else {
-                $query = "SELECT UNIX_TIMESTAMP(date) AS date, temp AS temp FROM " . getReadingsDbTableName($sensor) . " WHERE $where " . getWhereStatementPeriod($sensor, '') . " $groupby ORDER BY $order";
+                //$query = "SELECT UNIX_TIMESTAMP(date) AS date, temp AS temp FROM readings WHERE $where $groupby ORDER BY $order";
+                $query = "SELECT UNIX_TIMESTAMP(i.date) AS date, i.sensor_id, temp, s.name, s.color FROM readings r"
+                        . " RIGHT JOIN ("
+                        . " SELECT date, sensor_id FROM readings $where ORDER BY date DESC"
+                        . " ) AS i ON i.date = r.date AND i.sensor_id = r.sensor_id"
+                        . " RIGHT JOIN sensors s ON s.sensor_id = r.sensor_id"
+                        . " ORDER BY sensor_id, date ASC";
             }
 		}
 
 		if (isset($_GET['debug'])) {
-			echo $query;
+			echo $query . "<br /><br />";
 		}
 					 
 		$result = mysql_query($query) or die(mysql_error().' '.sqlerr(__FILE__, __LINE__));
 		
+        $lastId = -1;
+        $collection = array();
+        $lastName;
+        $lastColor;
+        
 		while($row = mysql_fetch_array($result)) 
 		{
+            if (intval($row['sensor_id']) != $lastId) {                
+                if (isset($arr)) {
+                    if ($lastId >= 0) {
+                        array_push($collection, array($lastId, $lastName, $lastColor, $arr));
+                    }
+                    
+                    unset($arr);
+                    $arr = array();
+                }
+                
+                $lastId = intval($row['sensor_id']);
+            }
+            
 			array_push($arr, array((intval($row['date']) * 1000), floatval($row['temp'])));
+            $lastName = $row['name'];
+            $lastColor = $row['color'];
 		}
 		
-		$outStr = json_encode($arr);
-		
-		if(isset($_GET['usecache']) && $_GET['usecache'] == "true") 
-		{
-			writeCache($sensor, $from, $period, $outStr);
-		}
+        array_push($collection, array($lastId, $lastName, $lastColor, $arr));
+        
+		$outStr = json_encode($collection);
+        
+		//if(isset($_GET['usecache']) && $_GET['usecache'] == "true") 
+		//{
+		//	writeCache($sensor, $from, $period, $outStr);
+		//}
 		
 		mysql_free_result($result);
 		mysql_close($connection);
 	}
 	
-} else {
-	$result = mysql_query("SELECT name, color FROM sensors ORDER BY name") or die(mysql_error().' '.sqlerr(__FILE__, __LINE__));
-	
-	while($row = mysql_fetch_array($result)) {
-	  array_push($arr,Array('name' => $row['name'], 'color' => $row['color']));
-	}
-	
-	$outStr = json_encode($arr);
-	
-	mysql_free_result($result);
-	mysql_close($connection);
-}
+}// else {
+//	$result = mysql_query("SELECT name, color FROM sensors ORDER BY name") or die(mysql_error().' '.sqlerr(__FILE__, __LINE__));
+//	
+//	while($row = mysql_fetch_array($result)) {
+//	  array_push($arr,Array('name' => $row['name'], 'color' => $row['color']));
+//	}
+//	
+//	$outStr = json_encode($arr);
+//	
+//	mysql_free_result($result);
+//	mysql_close($connection);
+//}
 
 echo $outStr;
 
-function getWhereStatementLatest($sensor_name, $where) {
+function getWhereStatementLatest($sensor_name, $where, $isLatest) {
 	if (Settings::DB_SCHEMA_VERSION == 1)
 	{
 		return " WHERE date = (SELECT MAX(date) FROM sensors AND name = $sensor_name)";
@@ -121,18 +154,15 @@ function getWhereStatementLatest($sensor_name, $where) {
 		else
 			$where = " WHERE ";
 			
-		$where .= "`sensor_id` = $sensor_id ORDER BY date DESC LIMIT 1";
+		$where .= "`sensor_id` = $sensor_id ";
+        
+        if ($isLatest) {
+            $where .= "GROUP BY date ";
+        }
+
+        $where .= "ORDER BY date DESC LIMIT 1";
 		
 		return $where;
-	}
-}
-
-function getWhereStatementPeriod($sensor_name) {
-	if (Settings::DB_SCHEMA_VERSION == 1) {
-		return "";
-	}
-	else {
-		return " AND sensor_id = " . getSensorIdFromSensorName($sensor_name);
 	}
 }
 
@@ -146,14 +176,6 @@ function getSensorIdFromSensorName($sensor_name) {
 	}
 	
 	return mysql_result($result, 0, "sensor_id");
-}
-
-function getReadingsDbTableName($sensor)
-{
-	if (Settings::DB_SCHEMA_VERSION == 1)
-		return $sensor;
-	else
-		return "readings";
 }
 
 function getCacheFileName($sensor, $from, $period) {

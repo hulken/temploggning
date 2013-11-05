@@ -137,11 +137,11 @@ TempChart.prototype = {
 	loadData: function(sensors, period, from, to) {
 		$(document).trigger('TempChart_in_progress', [true]);
 		var me = this;
-		var seriesCounter = 0;
+		//var seriesCounter = 0;
 		var series = []; 		
-		$.each(sensors, function(i, sensor) {
+		//$.each(sensors, function(i, sensor) {
 			var params = {
-				sensor: sensor.name,
+		//		sensor: sensor.name,
                 tempstring: (new Date()).getTime(),
 			};
 			if(typeof me.USE_CACHE !== 'undefined') { params.usecache = me.USE_CACHE; }
@@ -150,22 +150,39 @@ TempChart.prototype = {
 			if(to) { 	 params.to = to; } 
 			me._doRequest({
 				url: me.DATA_URL + '?' + $.param(params)
-			},function(data) {
+			},function(datas) {
 				
+                $.each(datas, function(j, data) {
+                    // console.log(data[1].length);
+                    
+                    var seriesData;
+                    
+                    if (data.length > 2) {
+                        seriesData = data[3];
+                    }
+                    
 					series.push({
-						name: sensor.name.substr(0,1).toUpperCase() + sensor.name.substr(1),
-						color: sensor.color,
-						data: data
+                    	name: data[1],
+                    	color: data[2],
+                    	data: seriesData
 					});
+                });
+                console.log('\n');
 
-					seriesCounter++;
+				//
+				//
+				//
+				//
+				//
 
-					if (seriesCounter == sensors.length) { // All data is loaded
-						me._sortSeries(series,'name');
+				//seriesCounter++;
+
+				//if (seriesCounter == sensors.length) { // All data is loaded
+				//me._sortSeries(series,'name');
 						$(document).trigger('TempChart_data_loaded', [series, period]);
-					}
+				//}
 			});
-		});
+		//});
 		
 	
 	},
@@ -330,7 +347,7 @@ TempChart.prototype = {
 				if(typeof data === 'object') {
 					callback(data);
 				} else {
-					$(document).trigger('TempChart_error', ['Inget data returnerades frÃ¥n servern.']);	
+					$(document).trigger('TempChart_error', ['Inget data returnerades från servern.']);	
 				}
 			})
 			.fail(function(jqXHR, textStatus, errorThrown) {
