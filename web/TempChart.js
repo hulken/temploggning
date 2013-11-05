@@ -34,7 +34,7 @@ TempChart.prototype = {
 
 	// Constants
 	// ---------------
-	DATA_URL: 'data', // URL to load data from
+	DATA_URL: 'data/index.php', // URL to load data from
 	USE_CACHE: true, // Use serverside json-cache
 	MAIN_ELEMENT_ID: 'graph', // Main graph html element id
 	CONTROLS_ELEMNT_ID: 'controls', // Controls html element id
