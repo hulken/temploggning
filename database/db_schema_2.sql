@@ -34,7 +34,7 @@ CREATE TABLE IF NOT EXISTS `readings` (
 --
 
 CREATE TABLE IF NOT EXISTS `sensors` (
-  `sensor_id` int NOT NULL,
+  `sensor_id` int NOT NULL AUTO_INCREMENT,
   `id` varchar(200) NOT NULL,
   `name` varchar(200) NOT NULL,
   `color` varchar(20) DEFAULT NULL,
