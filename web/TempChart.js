@@ -95,6 +95,11 @@ TempChart.prototype = {
 			return false;
 		});
 
+		$("#nav-collapse .nav li a").click(function(event) {
+			// Hide menu item select
+	    	$("#nav-collapse").removeClass("in").addClass("collapse");
+	    });
+
 		
 	},
 
