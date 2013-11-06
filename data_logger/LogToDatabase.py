@@ -18,7 +18,7 @@ import mysql.connector
 from configobj import ConfigObj
 
 # Read config
-config = ConfigObj('logToDatabase.conf')
+config = ConfigObj(sys.path[0] + 'logToDatabase.conf')
 if(config is not None):
     # Select logger type
     if(config["logger_type"] == "tellstick"):
