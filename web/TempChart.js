@@ -27,7 +27,8 @@ var TempChart = TempChart ||
 		this.bindEvents();
 
 		// Initiate sensor load
-		this.loadSensors();
+		//this.loadSensors();
+		this.loadView();
 	};
 
 TempChart.prototype = {
@@ -84,7 +85,7 @@ TempChart.prototype = {
 
 		$(document).on('submit','#customView',function(e) {
 		 // console.log((((new Date($('#todatetime').val() + ':00')).getTime()/1000) - ((new Date($('#fromdatetime').val() + ':00')).getTime()/1000))/60/60/24);
-		  me.loadData(me.sensors, null, ((new Date($('#fromdatetime').val() + ':00')).getTime()/1000), ((new Date($('#todatetime').val() + ':00')).getTime()/1000))
+		  me.loadData(null, ((new Date($('#fromdatetime').val() + ':00')).getTime()/1000), ((new Date($('#todatetime').val() + ':00')).getTime()/1000))
 		  e.preventDefault();
 		  return false;
 		});
@@ -116,14 +117,16 @@ TempChart.prototype = {
 		} else {
 			this.startAutoRefresh();
 			this.$controlsElement.html('');
-			this.loadData(this.sensors, period);
+			this.loadData(period);
 		}
 	},
 
 	/* loadSensors
-	 *
+	 *  REMOVE?
+	 *  DEPRECATED - backend retruns all sensors in loadData
 	 */
 	loadSensors: function() {
+		console.warn("DEPRECATED - backend now retruns all sensors in loadData. Use loadData instead.")
 		var me = this;
 		me._doRequest({
 				url: this.DATA_URL
@@ -139,57 +142,38 @@ TempChart.prototype = {
 	 *  @param  from 		datetime 	load data from this datetime
 	 *  @param  to 			datetime 	load data to this datetime
 	 */
-	loadData: function(sensors, period, from, to) {
+	loadData: function(period, from, to) {
 		$(document).trigger('TempChart_in_progress', [true]);
 		var me = this;
-		//var seriesCounter = 0;
 		var series = []; 		
-		//$.each(sensors, function(i, sensor) {
-			var params = {
-		//		sensor: sensor.name,
-                tempstring: (new Date()).getTime(),
-			};
-			if(typeof me.USE_CACHE !== 'undefined') { params.usecache = me.USE_CACHE; }
-			if(typeof period !== 'undefined' && period !== null) { params.period = period; }
-			if(from) { 	 params.from = from; }
-			if(to) { 	 params.to = to; } 
-			me._doRequest({
-				url: me.DATA_URL + '?' + $.param(params)
-			},function(datas) {
-				
-                $.each(datas, function(j, data) {
-                    // console.log(data[1].length);
-                    
-                    var seriesData;
-                    
-                    if (data.length > 2) {
-                        seriesData = data[3];
-                    }
-                    
-					series.push({
-                    	name: data[1],
-                    	color: data[2],
-                    	data: seriesData
-					});
-                });
-                console.log('\n');
+		var params = {
+		    tempstring: (new Date()).getTime(),
+		};
 
-				//
-				//
-				//
-				//
-				//
+		if(typeof me.USE_CACHE !== 'undefined') { params.usecache = me.USE_CACHE; }
+		if(typeof period !== 'undefined' && period !== null) { params.period = period; }
+		if(from) { 	 params.from = from; }
+		if(to) { 	 params.to = to; } 
+		me._doRequest({
+			url: me.DATA_URL + '?' + $.param(params)
+		},function(datas) {
+			
+            $.each(datas, function(j, data) {
+                var seriesData;
+                
+                if (data.length > 2) {
+                    seriesData = data[3];
+                }
+                
+				series.push({
+                	name: data[1],
+                	color: data[2],
+                	data: seriesData
+				});
+            });
 
-				//seriesCounter++;
-
-				//if (seriesCounter == sensors.length) { // All data is loaded
-				//me._sortSeries(series,'name');
-						$(document).trigger('TempChart_data_loaded', [series, period]);
-				//}
-			});
-		//});
-		
-	
+			$(document).trigger('TempChart_data_loaded', [series, period]);
+		});
 	},
 
 	/* showLoadingMessage
@@ -400,9 +384,10 @@ TempChart.prototype = {
 
 
 	/* _createCompareView
-	 * DEPRECATED, needs to be updated to Boostrap 3 html syntax
+	 * OUTDATED, needs to be updated to Boostrap 3 html syntax
 	 */
 	_createCompareView: function() {
+		console.warn('OUTDATED, needs to be updated to Boostrap 3 html syntax');
 		this.$mainElement.html('');
 		var d = new Date();
 		var str = '<div class="well">' + 

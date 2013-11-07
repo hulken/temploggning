@@ -12,6 +12,10 @@
         padding-bottom: 23px;
       }
 
+      .table > tbody > tr > td {
+        padding: 0 12px;
+      }
+
       .latest-table .first-td {
         width: 50%;
         min-width: 175px; 
@@ -22,7 +26,7 @@
         width: 50%;
         vertical-align: bottom; 
         padding-left: 0px;
-        padding-bottom: 27px; 
+        padding-bottom: 19px; 
         font-size: 16px;
         line-height: 1;
       }
