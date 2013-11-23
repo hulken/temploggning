@@ -2,6 +2,36 @@
  *
  *
  */
+ 
+ // Get cookie
+function getCookie(c_name){
+  var c_value = document.cookie;
+  var c_start = c_value.indexOf(" " + c_name + "=");
+  if (c_start == -1)  {
+    c_start = c_value.indexOf(c_name + "=");
+  }
+  if (c_start == -1)  {
+    c_value = null;
+  }
+  else  {
+    c_start = c_value.indexOf("=", c_start) + 1;
+    var c_end = c_value.indexOf(";", c_start);
+    if (c_end == -1)    {
+      c_end = c_value.length;
+    }
+    c_value = unescape(c_value.substring(c_start,c_end));
+  }
+  return c_value;
+};
+
+// Set cookie
+function setCookie(c_name,value,exdays)
+{
+  var exdate=new Date();
+  exdate.setDate(exdate.getDate() + exdays);
+  var c_value=escape(value) + ((exdays==null) ? "" : "; expires="+exdate.toUTCString());
+  document.cookie=c_name + "=" + c_value;
+};
 
 var TempChart = TempChart || 
 
@@ -30,6 +60,8 @@ var TempChart = TempChart ||
 		//this.loadSensors();
 		this.loadView();
 	};
+	
+	
 
 TempChart.prototype = {
 
@@ -77,6 +109,15 @@ TempChart.prototype = {
 			} else {
 				me.createChartView(series); 
 			}
+			
+			// Hide not choosen series from cookie
+      $.each(me.chart.series, function(i, serie) {
+          var cookieValue = getCookie(serie.name);
+          if (cookieValue == 'false') {
+              serie.setVisible(false);
+          }
+      });
+			
 		});
 
 		window.onhashchange = function() {
@@ -284,6 +325,11 @@ TempChart.prototype = {
             },
 			plotOptions: {
                 spline: {
+                    events: {
+                      legendItemClick: function () {
+                        setCookie(this.name, !this.visible, 7);
+                      }
+                    },
                     lineWidth: 4,
                     states: {
                         hover: {
