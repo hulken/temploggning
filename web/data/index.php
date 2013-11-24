@@ -8,7 +8,7 @@ $arr = Array();
 	
 	if(isset($_GET['from']) && isset($_GET['to'])) {
 		$from = $_GET['from'];
-		$period = (($_GET['to'] - $_GET['from']) * 0.016666666666666666 * 0.016666666666666666 * 0.041666666666666664);
+		$period = (($_GET['to'] - $_GET['from']) * (1/60) * (1/60) * (1/24));
 	}
 	
 	if(isset($_GET['period'])) {
@@ -44,7 +44,7 @@ $arr = Array();
 	if(isset($_GET['from']) && isset($_GET['to'])) {
 		$where = "FROM_UNIXTIME(" . $_GET['from'] . ") <= date && FROM_UNIXTIME(" . $_GET['to'] . ") > r.date ";
 	} else {
-		$where = "DATE_SUB(CURDATE(),INTERVAL " . $period ." DAY) <= r.date ";
+		$where = "DATE_SUB(NOW(),INTERVAL " . $period ." DAY) <= r.date ";
 	}
 		
 	$order = "date ASC";
