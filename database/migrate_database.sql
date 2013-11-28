@@ -1,5 +1,5 @@
 -- Note: You need to set the correct current version below!!!!
-DECLARE @current_version int = 1;
+DECLARE @current_version int = 2;
 
 IF (@current_version == 1) BEGIN
 	-- Create new readings table
@@ -45,5 +45,14 @@ IF (@current_version == 1) BEGIN
 
 END
 ELSE IF (@current_version == 2) BEGIN
+
+	-- Add new columns to sensors-table
+	ALTER TABLE  `sensors` ADD  `sensor_type` INT NOT NULL ,
+		ADD  `sensor_unit` VARCHAR( 200 ) NOT NULL
+
+	ALTER TABLE  `temploggning`.`sensors` DROP INDEX  `ix_id` ,
+		ADD UNIQUE  `ix_id` (  `id` ,  `sensor_type` )
+END
+ELSE IF (@current_version == 3) BEGIN
 	PRINT 'Your database schema is already up to date';
 END
