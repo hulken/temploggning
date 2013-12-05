@@ -385,7 +385,7 @@ TempChart.prototype = {
                         setCookie(this.name, !this.visible, 7);
                       }
                     },
-                    lineWidth: 4,
+                    lineWidth: 2,
                     states: {
                         hover: {
                             lineWidth: 5
