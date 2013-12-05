@@ -5,32 +5,36 @@
  
  // Get cookie
 function getCookie(c_name){
-  var c_value = document.cookie;
-  var c_start = c_value.indexOf(" " + c_name + "=");
-  if (c_start == -1)  {
-    c_start = c_value.indexOf(c_name + "=");
-  }
-  if (c_start == -1)  {
-    c_value = null;
-  }
-  else  {
-    c_start = c_value.indexOf("=", c_start) + 1;
-    var c_end = c_value.indexOf(";", c_start);
-    if (c_end == -1)    {
-      c_end = c_value.length;
-    }
-    c_value = unescape(c_value.substring(c_start,c_end));
-  }
+	var c_value = document.cookie;
+	var c_start = c_value.indexOf(" " + c_name + "=");
+	if (c_start == -1)  {
+		c_start = c_value.indexOf(c_name + "=");
+	}
+	
+	if (c_start == -1)  {
+		c_value = null;
+	}
+	else  {
+		c_start = c_value.indexOf("=", c_start) + 1;
+		var c_end = c_value.indexOf(";", c_start);
+
+	    if (c_end == -1)    {
+	    	c_end = c_value.length;
+		}
+
+		c_value = unescape(c_value.substring(c_start,c_end));
+	}
+
   return c_value;
 };
 
 // Set cookie
 function setCookie(c_name,value,exdays)
 {
-  var exdate=new Date();
-  exdate.setDate(exdate.getDate() + exdays);
-  var c_value=escape(value) + ((exdays==null) ? "" : "; expires="+exdate.toUTCString());
-  document.cookie=c_name + "=" + c_value;
+	var exdate = new Date();
+	exdate.setDate(exdate.getDate() + exdays);
+	var c_value = escape(value) + ((exdays == null) ? "" : "; expires=" + exdate.toUTCString());
+	document.cookie = c_name + "=" + c_value;
 };
 
 var TempChart = TempChart || 
@@ -128,12 +132,14 @@ TempChart.prototype = {
 		 // console.log((((new Date($('#todatetime').val() + ':00')).getTime()/1000) - ((new Date($('#fromdatetime').val() + ':00')).getTime()/1000))/60/60/24);
 		  me.loadData(null, ((new Date($('#fromdatetime').val() + ':00')).getTime()/1000), ((new Date($('#todatetime').val() + ':00')).getTime()/1000))
 		  e.preventDefault();
+
 		  return false;
 		});
 
 		$(document).on('click','#refreshButton',function(e) {
 			me.loadView();
 			e.preventDefault();
+
 			return false;
 		});
 
@@ -151,6 +157,7 @@ TempChart.prototype = {
 	loadView: function() {
 		this.stopAutoRefresh();
 		var period = this._getPeriod();
+
 		if(period === 'compare') {
 			this._createCompareView();
 		} else if(period === 'custom') {
@@ -170,8 +177,8 @@ TempChart.prototype = {
 		console.warn("DEPRECATED - backend now retruns all sensors in loadData. Use loadData instead.")
 		var me = this;
 		me._doRequest({
-				url: this.DATA_URL
-		},function(sensors) {
+			url: this.DATA_URL
+		}, function(sensors) {
 			me.sensors = sensors;
 			$(document).trigger('TempChart_sensors_loaded', [sensors]);
 		});
@@ -197,7 +204,7 @@ TempChart.prototype = {
 		if(to) { 	 params.to = to; } 
 		me._doRequest({
 			url: me.DATA_URL + '?' + $.param(params)
-		},function(datas) {
+		}, function(datas) {
 			
             $.each(datas, function(j, data) {
                 var seriesData;
@@ -283,6 +290,7 @@ TempChart.prototype = {
 			}
 			
 		});
+
 		tableStr += '</tbody></table>';
 		me.$mainElement.html(tableStr);
 
@@ -407,6 +415,7 @@ TempChart.prototype = {
             
             series: series
         });
+
 		$(document).trigger('TempChart_in_progress', [false]);
 	},
 
@@ -561,6 +570,7 @@ TempChart.prototype = {
 		// The Bubble Sort method. 
 	  	for(x = 0; x < series.length; x++) { 
 	    	var swapOccured = false;
+
 		    for(y = 0; y < (series.length-1); y++) { 
 		      	if((by === 'name' && series[y].name.localeCompare(series[y+1].name) > 0) || (series[y].data.length > 0 && series[y+1].data.length > 0 && series[y].data[0][0] < series[y+1].data[0][0])) {
 
@@ -570,6 +580,7 @@ TempChart.prototype = {
 		        	swapOccured = true;
 		      	} 
 		    }
+
 		    if (!swapOccured) break; 
 		}
 	},
