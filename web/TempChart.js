@@ -202,15 +202,32 @@ TempChart.prototype = {
             $.each(datas, function(j, data) {
                 var seriesData;
                 
-                if (data.length > 2) {
-                    seriesData = data[3];
+                if (data.length > 3) {
+                    seriesData = data[4];
                 }
                 
-				series.push({
-                	name: data[1],
-                	color: data[2],
-                	data: seriesData
-				});
+                if (data[3] == 0) { // temp
+					series.push({
+	                	name: data[1],
+	                	color: data[2],
+	                	tooltip: {
+		                    valueSuffix: ' \u00B0C'
+		                },
+	                	data: seriesData
+					});
+				}
+				else if (data[3] == 1) { // humidity
+					series.push({
+	                	name: data[1],
+	                	color: data[2],
+	                	yAxis: 1,
+	                	dashStyle: 'shortdot',
+	                	tooltip: {
+		                    valueSuffix: ' %'
+		                },
+	                	data: seriesData
+					});
+				}
             });
 
 			$(document).trigger('TempChart_data_loaded', [series, period]);
@@ -254,8 +271,10 @@ TempChart.prototype = {
 		var tableStr = '<table class="table latest-table table-responsive"><tbody>';
 		$.each(series, function(i, serie) {
 			if (serie.data.length > 0) {
-				d = Highcharts.dateFormat('%Y.%m.%d %H:%M', new Date(serie.data[0][0]));
-				tableStr += '<tr class="' + colorClass +'"><td class="first-td"><h1 class="heading1">' + serie.data[0][1].toFixed(1) + '</h1></td><td class="second-td">' + serie.name + '<br><span class="latest-date">' + d + '</span></td></tr>';
+				var unit = series[i].tooltip.valueSuffix;
+
+				d = Highcharts.dateFormat('%Y-%m-%d %H:%M', new Date(serie.data[0][0]));
+				tableStr += '<tr class="' + colorClass +'"><td class="first-td"><h1 class="heading1">' + serie.data[0][1].toFixed(1) + '</h1></td><td class="second-td">' + unit + ' - ' + serie.name + '<br><span class="latest-date">' + d + '</span></td></tr>';
 				if((i) < series.length && series[(i)].data[0][0] < ((new Date().getTime()) - 86400000) && !spacerAdded) {
 					//tableStr += '<tr><td class="latest-spacer"></td><td class="latest-spacer"></td></tr>';
 					spacerAdded = true;
@@ -306,21 +325,57 @@ TempChart.prototype = {
 					}
 				}
             },
-            yAxis: {
+            yAxis: [{ // Primary axis
+				labels: {
+                    formatter: function() {
+                        return this.value + ' \u00B0C';
+                    },
+                    style: {
+			        	fontFamily: 'Helvetica, Arial, Verdana, sans-serif', // default font
+						fontSize: '14px',
+						color: '#000000'
+                    }
+                },
                 title: {
-                    text: ''
+                    text: 'Temperatur',
+                    style: {
+						fontFamily: 'Helvetica, Arial, Verdana, sans-serif', // default font
+						fontSize: '14px',
+						color: '#000000'
+                    }
+                },
+            }, { // Secondary yAxis
+                gridLineWidth: 0,
+                title: {
+                    text: 'Luftfuktighet',
+                    style: {
+			        	fontFamily: 'Helvetica, Arial, Verdana, sans-serif', // default font
+						fontSize: '14px',
+						color: '#000000'
+                    }
                 },
                 labels: {
-	                style: {
+                    formatter: function() {
+                        return this.value +' %';
+                    },
+                    style: {
 			        	fontFamily: 'Helvetica, Arial, Verdana, sans-serif', // default font
-						fontSize: '14px'
-					}
-				}
-            },
+						fontSize: '14px',
+						color: '#000000'
+                    }
+                },
+                opposite: true
+			}],
             tooltip: {
                 formatter: function() {
-                        return '<b>'+ this.series.name +'</b> <br/>'+
-                        Highcharts.dateFormat('%Y.%m.%d %H:%M', this.x) +' <b>'+ this.y.toFixed(2) +' \u00B0C</b>';
+                	var unit = '\u00B0C';
+
+                	if (this.series.yAxis.userOptions.index == 1) { // humidity
+                		unit = '%';
+                	}
+
+                    return '<b>'+ this.series.name + '</b> <br/>' +
+                        Highcharts.dateFormat('%Y.%m.%d %H:%M', this.x) + ' <b>' + this.y.toFixed(2) + ' ' + unit + '</b>';
                 }
             },
 			plotOptions: {

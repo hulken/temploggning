@@ -46,7 +46,7 @@ $arr = Array();
 	} else {
 		$where = "DATE_SUB(NOW(),INTERVAL " . $period ." DAY) <= r.date ";
 	}
-		
+	
 	$order = "date ASC";
 	
     // Set back the period properly in order to not mess up the jsoncache
@@ -63,7 +63,7 @@ $arr = Array();
 	if(!isset($outStr) || !$outStr) 
 	{
 		if(isset($_GET['period']) && $_GET['period'] == 'latest') { // Latest readings
-            $query = "SELECT UNIX_TIMESTAMP(i.date) AS date, i.sensor_id, r.temp, s.name, s.color FROM readings r"
+            $query = "SELECT UNIX_TIMESTAMP(i.date) AS date, i.sensor_id, r.temp, s.name, s.color, s.sensor_type FROM readings r"
                         . " RIGHT JOIN ("
                         . " SELECT MAX(date) AS date, sensor_id FROM readings GROUP BY sensor_id"
                         . " ) AS i ON i.date = r.date AND i.sensor_id = r.sensor_id"
@@ -78,7 +78,7 @@ $arr = Array();
                 //        . " RIGHT JOIN sensors s ON s.sensor_id = r.sensor_id"
                 //        . " ORDER BY sensor_id, date ASC";
 
-				$query = "SELECT UNIX_TIMESTAMP(r.date) AS date, AVG(r.temp) AS temp, s.sensor_id, s.name, s.color FROM readings r"
+				$query = "SELECT UNIX_TIMESTAMP(r.date) AS date, AVG(r.temp) AS temp, s.sensor_id, s.name, s.color, s.sensor_type FROM readings r"
 						. "	LEFT JOIN sensors s ON r.sensor_id = s.sensor_id"
 						. "	WHERE $where"
 						. "	GROUP BY $groupby"
@@ -95,6 +95,7 @@ $arr = Array();
         $collection = array();
         $lastName;
         $lastColor;
+        $lastSensorType;
         $containData = false;
         
 		while($row = mysql_fetch_array($result)) 
@@ -102,7 +103,7 @@ $arr = Array();
             if (intval($row['sensor_id']) != $lastId) {                
                 if (isset($arr)) {
                     if ($lastId >= 0 && $containData) {
-                        array_push($collection, array($lastId, $lastName, $lastColor, $arr));
+                        array_push($collection, array($lastId, $lastName, $lastColor, $lastSensorType, $arr));
                     }
                     
                     unset($arr);
@@ -120,9 +121,10 @@ $arr = Array();
             
             $lastName = $row['name'];
             $lastColor = $row['color'];
+            $lastSensorType = $row['sensor_type'];
 		}
 		
-        array_push($collection, array($lastId, $lastName, $lastColor, $arr));
+        array_push($collection, array($lastId, $lastName, $lastColor, $lastSensorType, $arr));
         
 		$outStr = json_encode($collection);
         
