@@ -352,6 +352,17 @@ TempChart.prototype = {
 						color: '#000000'
                     }
                 },
+                plotLines:[{
+                    value:0,
+                    color: 'rgba(255, 0, 0, 0.15)',
+                    width:5,
+                    zIndex:1
+                }],
+                plotBands: [{ // Light air
+                    from: -40,
+                    to: 0,
+                    color: 'rgba(68, 170, 213, 0.05)',
+                }]
             }, { // Secondary yAxis
                 gridLineWidth: 0,
                 title: {
