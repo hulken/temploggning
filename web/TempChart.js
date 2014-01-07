@@ -57,6 +57,8 @@ TempChart.prototype = {
 	$controlsElement: null,
 	chart: null,
 	sensors: [],
+	series: [],
+	nrOfLoadedDataSources: 0,
 	refreshIntervalId: null,
 
 	// Methods
@@ -143,9 +145,20 @@ TempChart.prototype = {
 	 *  @param  to 			datetime 	load data to this datetime
 	 */
 	loadData: function(period, from, to) {
+		this.series = []; // Reset data series
+		this.nrOfLoadedDataSources = 0;
+		if(typeof this.DATA_URL === 'string') {
+			this.doLoadData(this.DATA_URL, period, from, to);
+		} else {
+			for (var i = 0; i < this.DATA_URL.length; i++) {
+				this.doLoadData(this.DATA_URL[i], period, from, to);
+			};
+		}
+	},
+
+	doLoadData: function(data_url, period, from, to, last_load) {
 		$(document).trigger('TempChart_in_progress', [true]);
-		var me = this;
-		var series = []; 		
+		var me = this; 		
 		var params = {
 		    tempstring: (new Date()).getTime(),
 		};
@@ -155,9 +168,9 @@ TempChart.prototype = {
 		if(from) { 	 params.from = from; }
 		if(to) { 	 params.to = to; } 
 		me._doRequest({
-			url: me.DATA_URL + '?' + $.param(params)
+			url: data_url + '?' + $.param(params)
 		},function(datas) {
-			
+			me.nrOfLoadedDataSources++;
             $.each(datas, function(j, data) {
                 var seriesData;
                 
@@ -165,14 +178,16 @@ TempChart.prototype = {
                     seriesData = data[3];
                 }
                 
-				series.push({
+				me.series.push({
                 	name: data[1],
                 	color: data[2],
+                	source: data_url,
                 	data: seriesData
 				});
             });
-
-			$(document).trigger('TempChart_data_loaded', [series, period]);
+            if(typeof me.DATA_URL !== 'string' && me.nrOfLoadedDataSources === me.DATA_URL.length) {
+				$(document).trigger('TempChart_data_loaded', [me.series, period]);
+			}
 		});
 	},
 
@@ -214,7 +229,7 @@ TempChart.prototype = {
 		$.each(series, function(i, serie) {
 			if (serie.data.length > 0) {
 				d = Highcharts.dateFormat('%Y.%m.%d %H:%M', new Date(serie.data[0][0]));
-				tableStr += '<tr class="' + colorClass +'"><td class="first-td"><h1 class="heading1">' + serie.data[0][1].toFixed(1) + '</h1></td><td class="second-td">' + serie.name + '<br><span class="latest-date">' + d + '</span></td></tr>';
+				tableStr += '<tr class="' + colorClass +'"><td class="first-td"><h1 class="heading1">' + serie.data[0][1].toFixed(1) + '</h1></td><td class="second-td">' + serie.name + '<br><span class="latest-date">' + d + '</span><br><span class="latest-date">' + serie.source + '</span></td></tr>';
 				if((i) < series.length && series[(i)].data[0][0] < ((new Date().getTime()) - 86400000) && !spacerAdded) {
 					//tableStr += '<tr><td class="latest-spacer"></td><td class="latest-spacer"></td></tr>';
 					spacerAdded = true;

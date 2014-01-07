@@ -10,6 +10,7 @@ def module_exists(module_name):
 
 import datetime;
 import time;
+import random;
 import sys, getopt, httplib, urllib, json, os
 if module_exists('oauth'):
     import oauth.oauth as oauth
@@ -52,7 +53,9 @@ if(config is not None):
             data = (name, id)
             cursor.execute("UPDATE sensors SET name = %s WHERE sensor_id = %s", data)
         else:
-            data = (id,  name, "#000000")
+            r = lambda: random.randint(0,255)
+            random_color = ('#%02X%02X%02X' % (r(),r(),r()))
+            data = (id,  name, random_color)
             cursor.execute("INSERT INTO sensors (id, name, color) VALUES (%s, %s, %s)", data)
             cursor.execute("SELECT sensor_id FROM sensors WHERE id = '" + id + "'")
             db_rows = cursor.fetchone()
