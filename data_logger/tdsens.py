@@ -74,6 +74,12 @@ def printUsage():
 
 def listDevices():
         response = doRequest('devices/list', {'supportedMethods': SUPPORTED_METHODS})
+        
+        try:
+            print response['error']
+        except KeyError:
+            iosdsdsdtemp = 1
+
         print("Number of devices: %i" % len(response['device']));
         for device in response['device']:
                 if (device['state'] == TELLSTICK_TURNON):
@@ -90,24 +96,34 @@ def listDevices():
                         state = 'Unknown state'
                 print("%s\t%s\t%s" % (device['id'], device['name'], state));
 
-def listSensors():
-   ignored = 0 #set to 1 to include ignored sensors
-   response = doRequest('sensors/list', {'includeIgnored': ignored})
-   #for sensor in response['sensor']:
-      #print("%s %s" % (unicode(sensor['id']).encode(sys.stdin.encoding), unicode(sensor['name']).encode(sys.stdin.encoding)));
-      #print("%s %s" % (unicode(sensor['id']).encode('iso-8859-1'), unicode(sensor['name']).encode('iso-8859-1')));
-      #print("%s %s" % (sensor['id'], sensor['name']));
-   return response
+def listSensors(debug):
+    ignored = 0 #set to 1 to include ignored sensors
+    response = doRequest('sensors/list', {'includeIgnored': ignored})
+    
+    if (debug == True):
+        print response
 
-def infoSensor(sensorId):
-   response = doRequest('sensor/info', {'id': sensorId})
-   lastUpdated = response['lastUpdated']
+        for sensor in response['sensor']:
+            #print("%s %s" % (unicode(sensor['id']).encode(sys.stdin.encoding), unicode(sensor['name']).encode(sys.stdin.encoding)));
+            #print("%s %s" % (unicode(sensor['id']).encode('iso-8859-1'), unicode(sensor['name']).encode('iso-8859-1')));
+            print("%s %s" % (sensor['id'], sensor['name']));
+    else:
+        return response
 
-   lastUpdatedReadable = datetime.datetime.fromtimestamp(int(lastUpdated)).strftime('%Y-%m-%d %H:%M:%S')
-   #for data in response['data']:
-       #print("Id: %s %s: %s Last update: %s" % (sensorId, unicode(data['name']).encode(sys.stdin.encoding), unicode(data['value']).encode(sys.stdin.encoding), lastUpdatedReadable));
-       #print("Id: %s %s: %s Last update: %s" % (sensorId, data['name'], data['value'], lastUpdatedReadable));
-   return response
+def infoSensor(sensorId, debug):
+    response = doRequest('sensor/info', {'id': sensorId})
+    lastUpdated = response['lastUpdated']
+
+    lastUpdatedReadable = datetime.datetime.fromtimestamp(int(lastUpdated)).strftime('%Y-%m-%d %H:%M:%S')
+   
+    if (debug == True):
+        print response
+        
+        for data in response['data']:
+            #print("Id: %s %s: %s Last update: %s" % (sensorId, unicode(data['name']).encode(sys.stdin.encoding), unicode(data['value']).encode(sys.stdin.encoding), lastUpdatedReadable));
+            print("Id: %s %s: %s Last update: %s" % (sensorId, data['name'], data['value'], lastUpdatedReadable));
+    else:
+        return response
 
 def doMethod(deviceId, methodId, methodValue = 0):
         response = doRequest('device/info', {'id': deviceId})
@@ -221,15 +237,16 @@ def main(argv):
                 sys.exit(2)
         dimlevel = -1
         print opts
+
 	for opt, arg in opts:
                 if opt in ("-h", "--help"):
                         printUsage()
                 elif opt in ("-l", "--list"):
                         listDevices()
                 elif opt in ("-s", "--sensor"):
-                        listSensors()
+                        listSensors(True)
                 elif opt in ("-i", "--info"):
-                        infoSensor(arg)
+                        infoSensor(arg, True)
                 elif opt in ("-n", "--on"):
                         doMethod(arg, TELLSTICK_TURNON)
                 elif opt in ("-f", "--off"):

@@ -17,10 +17,10 @@
 <!-- META TAGS END -->
 
 <!-- STYLES START -->
-    <link href="lib/bootstrap/css/bootstrap.min.css" rel="stylesheet">
-    <link href="lib/bootstrap/css/bootstrap-theme.min.css" rel="stylesheet">
-    <link href="lib/bootstrap-datetimepicker/css/bootstrap-datetimepicker.min.css" rel="stylesheet">
-    <link href="resources/style.css" rel="stylesheet">
+    <link href="../lib/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="../lib/bootstrap/css/bootstrap-theme.min.css" rel="stylesheet">
+    <link href="../lib/bootstrap-datetimepicker/css/bootstrap-datetimepicker.min.css" rel="stylesheet">
+    <link href="../resources/style.css" rel="stylesheet">
 <!-- STYLES END -->
 
 <!-- HTML5 shim START, for IE6-8 support of HTML5 elements -->
@@ -29,15 +29,6 @@
     <![endif]-->
 <!-- HTML5 shim END -->
 
-<!-- FAV AND TOUCH ICONS START -->
-<!--
-    <link rel="shortcut icon" href="../assets/ico/favicon.ico">
-    <link rel="apple-touch-icon-precomposed" sizes="144x144" href="../assets/ico/apple-touch-icon-144-precomposed.png">
-    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="../assets/ico/apple-touch-icon-114-precomposed.png">
-    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="../assets/ico/apple-touch-icon-72-precomposed.png">
-    <link rel="apple-touch-icon-precomposed" href="../assets/ico/apple-touch-icon-57-precomposed.png">
--->
-<!-- FAV AND TOUCH ICONS END -->
   </head>
 
   <body>
@@ -45,7 +36,7 @@
     <div class="navbar navbar-inverse navbar-static-top">
       <div class="container">
         <div class="navbar-header">
-          <a class="navbar-brand" href="#">Temperaturer</a>
+          <a class="navbar-brand" href="#">Admininstrate</a>
 
           <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
             <span class="icon-bar"></span>
@@ -56,18 +47,7 @@
        
         <div class="navbar-collapse collapse" id="nav-collapse">
           <ul class="nav navbar-nav">
-            <li id="latest" class="nav-opt"><a href="#latest">Senaste</a></li>
-            <li id="day" class="nav-opt"><a href="#day">Dygn</a></li>
-            <li id="week" class="nav-opt"><a href="#week">Vecka</a></li>
-            <li id="month" class="nav-opt"><a href="#month">M&aring;nad</a></li>
-            <li id="year" class="nav-opt"><a href="#year">&Aring;r</a></li>
-            <!-- <li id="compare" class="nav-opt"><a href="#compare">J&auml;mf&ouml;r</a></li> -->
-            <li id="custom" class="nav-opt"><a href="#custom">Valfritt</a></li>
-          </ul>
-          <ul class="nav navbar-nav navbar-right">
-            <li>
-              <a href="#" id="refreshButton"><span class="glyphicon glyphicon-refresh"></span></a>
-            </li>
+            <li class="nav-opt"><a href="#sensor_names">Sensor names</a></li>
           </ul>
         </div>
       </div>
@@ -103,44 +83,31 @@
 
 <!-- MAIN CONTAINER START -->    
     <div class="container" id="container">
-      <div id="controls"></div>
-      <div id="graph" style="height: 400px; margin: 0 auto"></div>
+      <div id="sensor_names"></div>
     </div> 
 <!-- MAIN CONTAINER END -->    
 
-<!-- SCRIPTS START -->    
-    <script src="lib/jquery-1.10.2.min.js"></script>
-    <script src="lib/bootstrap/js/bootstrap.min.js"></script>
-    <script src="lib/bootstrap-datetimepicker/js/bootstrap-datetimepicker.min.js"></script>
-    <script src="lib/highcharts/highcharts.js"></script>
-    <script src="lib/highcharts/highcharts-more.js"></script>
-    <script src="lib/highcharts/exporting.js"></script>
-    <script src="lib/TempChart.js"></script>
-    <script src="lib/TempChart/Charter.js"></script>
-    <script src="lib/TempChart/DataHandler.js"></script>
+	<script src="../lib/jquery-1.10.2.min.js"></script>
+	<script src="../lib/bootstrap/js/bootstrap.min.js"></script>
+    <script src="../lib/TempChart.js"></script>
+    <script src="../lib/TempChart/DataHandler.js"></script>
+    <script src="../lib/TempChart/Administrator.js"></script>
 
-    <script>
+	<script>
       var tempChart = null;
 
       $(function() {
 
           // Init new TempChart
           tempChart = new TempChart({
-            MAIN_ELEMENT_ID: 'graph',
-            CONTROLS_ELEMNT_ID: 'controls',
-            DATA_URL: [
-                        'data/'
-                        //,'markusdata', 'drakkedata'
-            ],
-            USE_CACHE: false,
+            DATA_URL: '../data/',
             DEBUG: true
           });
 
-          tempChart.initCharter();
+          tempChart.initAdministrator();
 
       });
     </script>
-    <script src="GoogleAnalytics.js"></script>
-<!-- SCRIPTS END -->    
+
   </body>
 </html>

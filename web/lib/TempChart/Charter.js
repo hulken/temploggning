@@ -1,40 +1,52 @@
 /* TempChart
  *
- *
+ *	Requiers: [
+ * 		Highcharts
+ *  	TempChart.DataHandler	
+ *	]
  */
 
-var TempChart = TempChart || 
+TempChart.Charter = TempChart.Charter || 
 
 	/* Constructor
 	 * @param 	options 	object 		configuration object to override default configuration
 	 */
 	function(options) {
+		console.log('INIT TempChart.Charter ::', options);
+
 		// Store configuration options
 		$.extend(this,options);
 
 		// Set highcharts defautls
-		Highcharts.setOptions({
-		    global: {
-		        useUTC: false
-		    }
-		});
+		if(typeof Highcharts !== 'undefined') {
+			Highcharts.setOptions({
+			    global: {
+			        useUTC: false
+			    }
+			});
+		} else {
 
+		}
 		// Get main elements
 		this.$mainElement = $('#' + this.MAIN_ELEMENT_ID);
 		this.$controlsElement = $('#' + this.CONTROLS_ELEMNT_ID);
 
+		
 		// Bind GUI and APP events
 		this.bindEvents();
 
 		// Initiate sensor load
-		//this.loadSensors();
 		this.loadView();
 	};
+	
+	
 
-TempChart.prototype = {
+TempChart.Charter.prototype = {
 
 	// Constants
 	// ---------------
+	BIND_EVENTS: true,
+	LOAD_ON_INITATE: true,
 	DATA_URL: 'data', // URL to load data from
 	USE_CACHE: true, // Use serverside json-cache
 	MAIN_ELEMENT_ID: 'graph', // Main graph html element id
@@ -70,15 +82,21 @@ TempChart.prototype = {
 	 */
 	bindEvents: function() {
 		var me = this;
-		$(document).bind('TempChart_error', function(e, msg, xhr) { me.showErrorMessage(msg) });
-		$(document).bind('TempChart_sensors_loaded', function(e, sensors) { me.loadView() });
-		$(document).bind('TempChart_in_progress', function(e, show) { me.showLoadingMessage(show); });
-		$(document).bind('TempChart_data_loaded', function(e, series, period) {
+		$(document).bind('TempChart_readings_loaded', function(e, series, period) {
 			if(period === 'latest') {
 				me.visualizeSingleValuesView(series);
 			} else {
 				me.createChartView(series); 
-			}
+
+				// Hide not choosen series from cookie
+		      	$.each(me.chart.series, function(i, serie) {
+		        	var cookieValue = me.getCookie(serie.name);
+		          	if (cookieValue == 'false') {
+		              	serie.setVisible(false);
+		          	}
+		      	});
+	      	}
+			
 		});
 
 		window.onhashchange = function() {
@@ -86,16 +104,17 @@ TempChart.prototype = {
 		};
 
 		$(document).on('submit','#customView',function(e) {
-		 // console.log((((new Date($('#todatetime').val() + ':00')).getTime()/1000) - ((new Date($('#fromdatetime').val() + ':00')).getTime()/1000))/60/60/24);
-		  me.loadData(null, ((new Date($('#fromdatetime').val() + ':00')).getTime()/1000), ((new Date($('#todatetime').val() + ':00')).getTime()/1000))
-		  e.preventDefault();
-		  return false;
+			var period = null;
+			var from = (new Date($('#fromdatetime').val() + ':00')).getTime()/1000;
+			var to = (new Date($('#todatetime').val() + ':00')).getTime()/1000;
+			console.log('EVENT FIRE LOAD_READINGS ::', period, from, to);
+			$(document).trigger('TempChart_load_readings', [period, from, to]);
+			e.preventDefault();
 		});
 
 		$(document).on('click','#refreshButton',function(e) {
 			me.loadView();
 			e.preventDefault();
-			return false;
 		});
 
 		$("#nav-collapse .nav li a").click(function(event) {
@@ -112,6 +131,7 @@ TempChart.prototype = {
 	loadView: function() {
 		this.stopAutoRefresh();
 		var period = this._getPeriod();
+
 		if(period === 'compare') {
 			this._createCompareView();
 		} else if(period === 'custom') {
@@ -119,100 +139,9 @@ TempChart.prototype = {
 		} else {
 			this.startAutoRefresh();
 			this.$controlsElement.html('');
-			this.loadData(period);
+			console.log('EVENT FIRE LOAD_READINGS ::', period);
+			$(document).trigger('TempChart_load_readings', [period]);
 		}
-	},
-
-	/* loadSensors
-	 *  REMOVE?
-	 *  DEPRECATED - backend retruns all sensors in loadData
-	 */
-	loadSensors: function() {
-		console.warn("DEPRECATED - backend now retruns all sensors in loadData. Use loadData instead.")
-		var me = this;
-		me._doRequest({
-				url: this.DATA_URL
-		},function(sensors) {
-			me.sensors = sensors;
-			$(document).trigger('TempChart_sensors_loaded', [sensors]);
-		});
-	},
-
-	/* loadData
-	 *	@param 	sensors 	array		string array containing senornames
-	 *  @param  period 		string 		named period to load data from
-	 *  @param  from 		datetime 	load data from this datetime
-	 *  @param  to 			datetime 	load data to this datetime
-	 */
-	loadData: function(period, from, to) {
-		this.series = []; // Reset data series
-		this.nrOfLoadedDataSources = 0;
-		if(typeof this.DATA_URL === 'string') {
-			this.doLoadData(this.DATA_URL, period, from, to);
-		} else {
-			for (var i = 0; i < this.DATA_URL.length; i++) {
-				this.doLoadData(this.DATA_URL[i], period, from, to);
-			};
-		}
-	},
-
-	doLoadData: function(data_url, period, from, to, last_load) {
-		$(document).trigger('TempChart_in_progress', [true]);
-		var me = this; 		
-		var params = {
-		    tempstring: (new Date()).getTime(),
-		};
-
-		if(typeof me.USE_CACHE !== 'undefined') { params.usecache = me.USE_CACHE; }
-		if(typeof period !== 'undefined' && period !== null) { params.period = period; }
-		if(from) { 	 params.from = from; }
-		if(to) { 	 params.to = to; } 
-		me._doRequest({
-			url: data_url + '?' + $.param(params)
-		},function(datas) {
-			me.nrOfLoadedDataSources++;
-            $.each(datas, function(j, data) {
-                var seriesData;
-                
-                if (data.length > 2) {
-                    seriesData = data[3];
-                }
-                
-				me.series.push({
-                	name: data[1],
-                	color: data[2],
-                	source: data_url,
-                	data: seriesData
-				});
-            });
-            if(typeof me.DATA_URL !== 'string' && me.nrOfLoadedDataSources === me.DATA_URL.length) {
-				$(document).trigger('TempChart_data_loaded', [me.series, period]);
-			}
-		});
-	},
-
-	/* showLoadingMessage
-	 * @param 		show 	boolean 	show loading message or not
-	 */
-	showLoadingMessage: function(show) {
-		$('#loading').modal(show ? 'show' : 'hide');
-	},
-
-	/* showErrorMessage
-	 * @param 		message 	string 		error message to display
-	 */
-	showErrorMessage: function(message) {
-		$('#error .modal-body').html(message);
-		$('#error').modal('show');
-	},
-
-	/* updateData
-	 * @param 		dataArray 		array 		update highcharts data
-	 */
-	updateData: function(dataArray) {
-		$.each(this.chart.series, function(i, serie) {
-			serie.setData(dataArray[serie.name]);
-		});
 	},
 
 	/* visualizeSingleValuesView
@@ -228,16 +157,18 @@ TempChart.prototype = {
 		var tableStr = '<table class="table latest-table table-responsive"><tbody>';
 		$.each(series, function(i, serie) {
 			if (serie.data.length > 0) {
-				d = Highcharts.dateFormat('%Y.%m.%d %H:%M', new Date(serie.data[0][0]));
-				tableStr += '<tr class="' + colorClass +'"><td class="first-td"><h1 class="heading1">' + serie.data[0][1].toFixed(1) + '</h1></td><td class="second-td">' + serie.name + '<br><span class="latest-date">' + d + '</span><br><span class="latest-date">' + serie.source + '</span></td></tr>';
+				var unit = series[i].tooltip.valueSuffix;
+				d = Highcharts.dateFormat('%Y-%m-%d %H:%M', new Date(serie.data[0][0]));
 				if((i) < series.length && series[(i)].data[0][0] < ((new Date().getTime()) - 86400000) && !spacerAdded) {
 					//tableStr += '<tr><td class="latest-spacer"></td><td class="latest-spacer"></td></tr>';
 					spacerAdded = true;
 					colorClass = 'header-gray';
 				} 
+				tableStr += '<tr class="' + colorClass +'"><td class="first-td"><h1 class="heading1">' + serie.data[0][1].toFixed(1) + '</h1></td><td class="second-td">' + unit + ' - ' + serie.name + '<br><span class="latest-date">' + d + '</span></td></tr>';
 			}
 			
 		});
+
 		tableStr += '</tbody></table>';
 		me.$mainElement.html(tableStr);
 
@@ -280,26 +211,78 @@ TempChart.prototype = {
 					}
 				}
             },
-            yAxis: {
+            yAxis: [{ // Primary axis
+				labels: {
+                    formatter: function() {
+                        return this.value + ' \u00B0C';
+                    },
+                    style: {
+			        	fontFamily: 'Helvetica, Arial, Verdana, sans-serif', // default font
+						fontSize: '14px',
+						color: '#000000'
+                    }
+                },
                 title: {
-                    text: ''
+                    text: 'Temperatur',
+                    style: {
+						fontFamily: 'Helvetica, Arial, Verdana, sans-serif', // default font
+						fontSize: '14px',
+						color: '#000000'
+                    }
+                },
+                plotLines:[{
+                    value:0,
+                    color: 'rgba(255, 0, 0, 0.15)',
+                    width:5,
+                    zIndex:1
+                }],
+                plotBands: [{ // Light air
+                    from: -40,
+                    to: 0,
+                    color: 'rgba(68, 170, 213, 0.05)',
+                }]
+            }, { // Secondary yAxis
+                gridLineWidth: 0,
+                title: {
+                    text: 'Luftfuktighet',
+                    style: {
+			        	fontFamily: 'Helvetica, Arial, Verdana, sans-serif', // default font
+						fontSize: '14px',
+						color: '#000000'
+                    }
                 },
                 labels: {
-	                style: {
+                    formatter: function() {
+                        return this.value +' %';
+                    },
+                    style: {
 			        	fontFamily: 'Helvetica, Arial, Verdana, sans-serif', // default font
-						fontSize: '14px'
-					}
-				}
-            },
+						fontSize: '14px',
+						color: '#000000'
+                    }
+                },
+                opposite: true
+			}],
             tooltip: {
                 formatter: function() {
-                        return '<b>'+ this.series.name +'</b> <br/>'+
-                        Highcharts.dateFormat('%Y.%m.%d %H:%M', this.x) +' <b>'+ this.y.toFixed(2) +' \u00B0C</b>';
+                	var unit = '\u00B0C';
+
+                	if (this.series.yAxis.userOptions.index == 1) { // humidity
+                		unit = '%';
+                	}
+
+                    return '<b>'+ this.series.name + '</b> <br/>' +
+                        Highcharts.dateFormat('%Y.%m.%d %H:%M', this.x) + ' <b>' + this.y.toFixed(2) + ' ' + unit + '</b>';
                 }
             },
 			plotOptions: {
                 spline: {
-                    lineWidth: 4,
+                    events: {
+                      legendItemClick: function () {
+                        me.setCookie(this.name, !this.visible, 7);
+                      }
+                    },
+                    lineWidth: 2,
                     states: {
                         hover: {
                             lineWidth: 5
@@ -321,6 +304,7 @@ TempChart.prototype = {
             
             series: series
         });
+
 		$(document).trigger('TempChart_in_progress', [false]);
 	},
 
@@ -343,20 +327,51 @@ TempChart.prototype = {
 		clearInterval(this.refreshIntervalId);
 	},
 
+	/* updateData
+	 * @param 		dataArray 		array 		update highcharts data
+	 */
+	updateData: function(dataArray) {
+		$.each(this.chart.series, function(i, serie) {
+			serie.setData(dataArray[serie.name]);
+		});
+	},
 
-	_doRequest: function(options, callback) {
-		$.ajax(
-			$.extend({dataType: 'json'},options))
-			.done(function(data) {
-				if(typeof data === 'object') {
-					callback(data);
-				} else {
-					$(document).trigger('TempChart_error', ['Inget data returnerades från servern.']);	
-				}
-			})
-			.fail(function(jqXHR, textStatus, errorThrown) {
-    			$(document).trigger('TempChart_error', [textStatus + ' ' + errorThrown, jqXHR]);
-    		});
+	/* Get cookie
+	*
+	*/
+	getCookie: function(c_name) {
+		var c_value = document.cookie;
+		var c_start = c_value.indexOf(' ' + c_name + '=');
+		if (c_start == -1)  {
+			c_start = c_value.indexOf(c_name + '=');
+		}
+		
+		if (c_start == -1)  {
+			c_value = null;
+		}
+		else  {
+			c_start = c_value.indexOf('=', c_start) + 1;
+			var c_end = c_value.indexOf(';', c_start);
+
+		    if (c_end == -1)    {
+		    	c_end = c_value.length;
+			}
+
+			c_value = unescape(c_value.substring(c_start,c_end));
+		}
+
+	  return c_value;
+	},
+
+	/* Set cookie
+	*
+	*/
+	setCookie: function(c_name, value, exdays)
+	{
+		var exdate = new Date();
+		exdate.setDate(exdate.getDate() + exdays);
+		var c_value = escape(value) + ((exdays == null) ? '' : '; expires=' + exdate.toUTCString());
+		document.cookie = c_name + '=' + c_value;
 	},
 
 	/* _createCustomView
@@ -466,28 +481,6 @@ TempChart.prototype = {
 		
 	},
 
-	/* _sortSeries
-	 * @param 	series 		array 		highcharts data series array
-	 * @param 	by 			string 		optionial, none or name is implemented
-	 */
-	_sortSeries: function(series, by) { 
-		var x, y, holder; 
-		// The Bubble Sort method. 
-	  	for(x = 0; x < series.length; x++) { 
-	    	var swapOccured = false;
-		    for(y = 0; y < (series.length-1); y++) { 
-		      	if((by === 'name' && series[y].name.localeCompare(series[y+1].name) > 0) || (series[y].data.length > 0 && series[y+1].data.length > 0 && series[y].data[0][0] < series[y+1].data[0][0])) {
-
-		        	holder = series[y+1]; 
-		        	series[y+1] = series[y]; 
-		        	series[y] = holder; 
-		        	swapOccured = true;
-		      	} 
-		    }
-		    if (!swapOccured) break; 
-		}
-	},
-
 	/* _getPeriod
 	 * 
 	 */
@@ -516,6 +509,30 @@ TempChart.prototype = {
 			default:
 				return 'latest'; // Start view
 				break;
+		}
+	},
+
+	/* _sortSeries
+	 * @param 	series 		array 		highcharts data series array
+	 * @param 	by 			string 		optionial, none or name is implemented
+	 */
+	_sortSeries: function(series, by) { 
+		var x, y, holder; 
+		// The Bubble Sort method. 
+	  	for(x = 0; x < series.length; x++) { 
+	    	var swapOccured = false;
+
+		    for(y = 0; y < (series.length-1); y++) { 
+		      	if((by === 'name' && series[y].name.localeCompare(series[y+1].name) > 0) || (series[y].data.length > 0 && series[y+1].data.length > 0 && series[y].data[0][0] < series[y+1].data[0][0])) {
+
+		        	holder = series[y+1]; 
+		        	series[y+1] = series[y]; 
+		        	series[y] = holder; 
+		        	swapOccured = true;
+		      	} 
+		    }
+
+		    if (!swapOccured) break; 
 		}
 	}
 };
