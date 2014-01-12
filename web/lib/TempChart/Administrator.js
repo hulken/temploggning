@@ -12,7 +12,7 @@ TempChart.Administrator = TempChart.Administrator ||
 		// Bind GUI and APP events
 		this.bindEvents();
 
-
+		this.strings = this.LANGUAGE.STRINGS[this.LANGUAGE.DEFAULT];
 
 		$(document).trigger('TempChart_load_sensors');
 		console.log('EVENT FIRE LOAD_SENSORS ::');
@@ -28,19 +28,28 @@ TempChart.Administrator.prototype = {
 	USE_CACHE: true, // Use serverside json-cache
 	DEBUG: false,
 	SENSORS_LIST_ELEMENT_ID: 'sensors-list',
-	SENSOR_TYPES: [
-		'Temperature',
-		'Humidity'
+	EDITABLE_COLUMNS: [
+		'id',
+		'name',
+		'color'
 	],
-	EDITABLE_COLUMNS: {
-		'name': true,
-		'color': true
-	},
 	SENSOR_EDIT_CLASS: 'sensor-edit',
-
+	LANGUAGE: {
+		DEFAULT: 'sv',
+		STRINGS:  {
+			sv: {
+				edit_tooltip: 'Klicka för att ändra...',
+				edit_cancel: 'Avbryt',
+				edit_submit: 'Spara'
+			}
+		}
+	},
+	
 	// Varibles
 	// ---------------
 	$sensorsList: null,
+	strings: {},
+	
 
 	// Methods
 	// ---------------
@@ -104,14 +113,14 @@ TempChart.Administrator.prototype = {
 
 	_initSensorsEdit: function() {
 		$('.' + this.SENSOR_EDIT_CLASS).editable(this._saveSensor, {
-	        tooltip   : 'Click to edit...',
-	        cancel    : 'Avbryt',
-         	submit    : 'Spara',
+	        tooltip   : this.strings.edit_tooltip,
+	        cancel    : this.strings.edit_cancel,
+         	submit    : this.strings.edit_submit,
 	    });
 	},
 
 	_isEditable: function(key) {
-		if(typeof this.EDITABLE_COLUMNS[key] !== 'undefined') {
+		if(this.EDITABLE_COLUMNS.indexOf(key) !== -1) {
 			return this.SENSOR_EDIT_CLASS;
 		} else {
 			return '';

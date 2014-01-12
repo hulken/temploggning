@@ -36,7 +36,7 @@
     <div class="navbar navbar-inverse navbar-static-top">
       <div class="container">
         <div class="navbar-header">
-          <a class="navbar-brand" href="#">Admininstrate</a>
+          <a class="navbar-brand" href="#">Administrera</a>
 
           <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
             <span class="icon-bar"></span>
@@ -47,7 +47,7 @@
        
         <div class="navbar-collapse collapse" id="nav-collapse">
           <ul class="nav navbar-nav">
-            <li class="nav-opt"><a href="#sensor_names">Sensor names</a></li>
+            <li class="nav-opt"><a href="#sensor_names">Sensorer</a></li>
           </ul>
         </div>
       </div>

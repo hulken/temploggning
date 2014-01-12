@@ -17,6 +17,8 @@ TempChart.Charter = TempChart.Charter ||
 		// Store configuration options
 		$.extend(this,options);
 
+		this.strings = this.LANGUAGE.STRINGS[this.LANGUAGE.DEFAULT];
+
 		// Set highcharts defautls
 		if(typeof Highcharts !== 'undefined') {
 			Highcharts.setOptions({
@@ -62,6 +64,18 @@ TempChart.Charter.prototype = {
 		'#A47D7C', 
 		'#B5CA92'
 	], // Default line colors, overridden if server data contains colors
+	LANGUAGE: {
+		DEFAULT: 'sv',
+		STRINGS:  {
+			sv: {
+				from: 'Fr&aring;n',
+				humidity: 'Luftfuktighet',
+				temperature: 'Temperatur',
+				update: 'Uppdatera',
+				to: 'Till'
+			}
+		}
+	},
 
 	// Varibles
 	// ---------------
@@ -72,6 +86,7 @@ TempChart.Charter.prototype = {
 	series: [],
 	nrOfLoadedDataSources: 0,
 	refreshIntervalId: null,
+	strings: {},
 
 	// Methods
 	// ---------------
@@ -223,7 +238,7 @@ TempChart.Charter.prototype = {
                     }
                 },
                 title: {
-                    text: 'Temperatur',
+                    text: this.strings.temperature,
                     style: {
 						fontFamily: 'Helvetica, Arial, Verdana, sans-serif', // default font
 						fontSize: '14px',
@@ -244,7 +259,7 @@ TempChart.Charter.prototype = {
             }, { // Secondary yAxis
                 gridLineWidth: 0,
                 title: {
-                    text: 'Luftfuktighet',
+                    text: this.strings.humidity,
                     style: {
 			        	fontFamily: 'Helvetica, Arial, Verdana, sans-serif', // default font
 						fontSize: '14px',
@@ -383,7 +398,7 @@ TempChart.Charter.prototype = {
 		var str = '<div class="well">' + 
 				'<form id="customView" class="form-inline">' +
 				'<div class="form-group">' +
-					'<label class="col-sm-2 control-label" for="fromdatetime">Fr&aring;n</label>' +
+					'<label class="col-sm-2 control-label" for="fromdatetime">' + this.strings.from + '</label>' +
 					'<div class="controls col-sm-10">' +
 			 			'<div class="input-group date datetimepicker">' +
 				   			'<input class="form-control" id="fromdatetime" data-format="yyyy-MM-dd hh:mm" type="text" value="' + Highcharts.dateFormat('%Y-%m-%d %H:%M', d.setDate(d.getDate() - 1)) + '"></input>' +
@@ -392,7 +407,7 @@ TempChart.Charter.prototype = {
 		  			'</div>' +
 		  		'</div>' +
 		  		'<div class="form-group">' +
-		  			'<label class="col-sm-2 control-label" for="todatetime">Till</label>' +
+		  			'<label class="col-sm-2 control-label" for="todatetime">' + this.strings.to + '</label>' +
 		  			'<div class="controls col-sm-10">' +
 			  			'<div class="input-group date datetimepicker">' +
 				   			'<input class="form-control" id="todatetime" data-format="yyyy-MM-dd hh:mm" type="text" value="' + Highcharts.dateFormat('%Y-%m-%d %H:%M', new Date()) + '"></input>' +
@@ -400,7 +415,7 @@ TempChart.Charter.prototype = {
 			      		'</div>' +
 		  			'</div>' +
 		  		'</div>' +
-				'<button type="submit" class="btn">Uppdatera</button>' + 
+				'<button type="submit" class="btn">' + this.strings.update + '</button>' + 
 			'</div>' +
 			'</div>' +
 			'</form>';
@@ -431,7 +446,7 @@ TempChart.Charter.prototype = {
 		});
 		str += '</select>' +
 				'</div>' +
-				'<label class="control-label" for="fromdatetime">Fr&aring;n</label>' +
+				'<label class="control-label" for="fromdatetime">' + this.strings.from + '</label>' +
 				'<div class="controls">' +
 		 			'<div class="input-append date datetimepicker">' +
 			   			'<input id="fromdatetime" data-format="yyyy-MM-dd hh:mm" type="text" value="' + Highcharts.dateFormat('%Y-%m-%d %H:%M', d.setDate(d.getDate() - 1)) + '"></input>' +
@@ -440,7 +455,7 @@ TempChart.Charter.prototype = {
 			      		'</span>' +
 		      		'</div>' +
 	  			'</div>' +
-	  			'<label class="control-label" for="todatetime">Till</label>' +
+	  			'<label class="control-label" for="todatetime">' + this.strings.to + '</label>' +
 	  			'<div class="controls">' +
 		  			'<div class="input-append date datetimepicker">' +
 			   			'<input id="todatetime" data-format="yyyy-MM-dd hh:mm" type="text" value="' + Highcharts.dateFormat('%Y-%m-%d %H:%M', new Date()) + '"></input>' +
@@ -451,7 +466,7 @@ TempChart.Charter.prototype = {
 	  			'</div>' +
 
 	  			'</div>' +
-				'<label class="control-label" for="fromdatetime">Fr&aring;n</label>' +
+				'<label class="control-label" for="fromdatetime">' + this.strings.from + '</label>' +
 				'<div class="controls">' +
 		 			'<div class="input-append date datetimepicker">' +
 			   			'<input id="fromdatetime" data-format="yyyy-MM-dd hh:mm" type="text" value="' + Highcharts.dateFormat('%Y-%m-%d %H:%M', d.setDate(d.getDate() - 365)) + '"></input>' +
@@ -460,7 +475,7 @@ TempChart.Charter.prototype = {
 			      		'</span>' +
 		      		'</div>' +
 	  			'</div>' +
-	  			'<label class="control-label" for="todatetime">Till</label>' +
+	  			'<label class="control-label" for="todatetime">' + this.strings.to + '</label>' +
 	  			'<div class="controls">' +
 		  			'<div class="input-append date datetimepicker">' +
 			   			'<input id="todatetime" data-format="yyyy-MM-dd hh:mm" type="text" value="' + Highcharts.dateFormat('%Y-%m-%d %H:%M', d.setDate(d.getDate() + 1)) + '"></input>' +
@@ -469,7 +484,7 @@ TempChart.Charter.prototype = {
 			      		'</span>' +
 		      		'</div>' +
 	  			'</div>' +
-	  			'<button type="submit" class="btn">Uppdatera</button>' + 
+	  			'<button type="submit" class="btn">' + this.strings.update + '</button>' + 
 			'</div>' +
 			'</div>' +
 			'</form>';

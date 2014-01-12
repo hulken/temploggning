@@ -76,7 +76,6 @@ TempChart.prototype = {
 	 * @param 		message 	string 		error message to display
 	 */
 	showErrorMessage: function(message) {
-		debugger;
 		console.log('ERROR', message);
 		$('#error .modal-body').html(message);
 		if($().modal) {

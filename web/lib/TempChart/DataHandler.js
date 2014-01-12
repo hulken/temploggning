@@ -14,6 +14,8 @@ TempChart.DataHandler = TempChart.DataHandler ||
 		// Store configuration options
 		$.extend(this,options);
 
+		this.strings = this.LANGUAGE.STRINGS[this.LANGUAGE.DEFAULT];
+
 		// Bind GUI and APP events
 		this.bindEvents();
 
@@ -27,9 +29,21 @@ TempChart.DataHandler.prototype = {
 	// ---------------
 	DATA_URL: 'data', // URL to load data from
 	USE_CACHE: true, // Use serverside json-cache
+	LANGUAGE: {
+		DEFAULT: 'sv',
+		STRINGS:  {
+			sv: {
+				data_load_error: 'Inget data returnerades från servern.'
+			}
+		}
+	},
+
+	// Varibles
+	// ---------------
 	sensors: [],
 	series: [],
 	nrOfLoadedDataSources: 0,
+	strings: {},
 
 	// Methods
 	// ---------------
@@ -154,6 +168,7 @@ TempChart.DataHandler.prototype = {
 	},
 
 	doRequest: function(options, callback) {
+		var me = this;
 		$.ajax(
 			$.extend({dataType: 'json'},options))
 			.done(function(data) {
@@ -165,7 +180,7 @@ TempChart.DataHandler.prototype = {
 						callback(data);
 					}
 				} else {
-					$(document).trigger('TempChart_error', ['Inget data returnerades från servern.']);	
+					$(document).trigger('TempChart_error', [me.strings.data_load_error]);	
 				}
 			})
 			.fail(function(jqXHR, textStatus, errorThrown) {
