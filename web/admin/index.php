@@ -83,11 +83,12 @@
 
 <!-- MAIN CONTAINER START -->    
     <div class="container" id="container">
-      <div id="sensor_names"></div>
+      <div id="sensors-list"></div>
     </div> 
 <!-- MAIN CONTAINER END -->    
 
 	<script src="../lib/jquery-1.10.2.min.js"></script>
+	<script src="../lib/jquery.jeditable.min.js"></script>
 	<script src="../lib/bootstrap/js/bootstrap.min.js"></script>
     <script src="../lib/TempChart.js"></script>
     <script src="../lib/TempChart/DataHandler.js"></script>

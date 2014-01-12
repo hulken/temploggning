@@ -19,8 +19,13 @@ class Sensors {
 
 	public function update($id, $name) {
 		$query = "UPDATE sensors SET name='$name' WHERE sensor_id=$id;";
-		$result = mysql_query($query) or die(mysql_error().' '.sqlerr(__FILE__, __LINE__));
-		return $result;
+		$result = mysql_query($query);
+		if($result == FALSE) {
+			return '{ error: ' +  mysql_error() + '}';	
+		} else {
+			return '{}';
+		}
+		
 	}
 }
 

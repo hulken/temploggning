@@ -1,70 +1,74 @@
 .modal { position: absolute; }
       
-      .heading1 {
-        font-size: 4.7em;
-      }
+.heading1 {
+  font-size: 4.7em;
+}
 
-      table, tbody, .table tr, .table th, .table td { 
-        border: none !important;
-      }
+table, tbody, .table tr, .table th, .table td { 
+  border: none !important;
+}
 
-      .latest-table tr {
-        padding-bottom: 23px;
-      }
+.latest-table tr {
+  padding-bottom: 23px;
+}
 
-      .table > tbody > tr > td {
-        padding: 0 12px;
-      }
+.table > tbody > tr > td {
+  padding: 0 12px;
+}
 
-      .latest-table .first-td {
-        width: 50%;
-        min-width: 175px; 
-        text-align: right;
-      }
+.latest-table .first-td {
+  width: 50%;
+  min-width: 175px; 
+  text-align: right;
+}
 
-      .latest-table .second-td {
-        width: 50%;
-        vertical-align: bottom; 
-        padding-left: 0px;
-        padding-bottom: 19px; 
-        font-size: 16px;
-        line-height: 1;
-      }
+.latest-table .second-td {
+  width: 50%;
+  vertical-align: bottom; 
+  padding-left: 0px;
+  padding-bottom: 19px; 
+  font-size: 16px;
+  line-height: 1;
+}
 
-      .latest-date {
-        font-size: 11px;
-      }
+.latest-date {
+  font-size: 11px;
+}
 
-      .latest-spacer {
-        height: 0px;
-      }
+.latest-spacer {
+  height: 0px;
+}
 
-      .latest-table .header-gray {
-        color: rgb(143, 142, 142);
-      }
+.latest-table .header-gray {
+  color: rgb(143, 142, 142);
+}
 
-      .input-group.date {
-        width: 180px;
-      }
+.input-group.date {
+  width: 180px;
+}
 
-      .navbar-inverse {
-        background-color: #222;
-        background-image: none;
-      }
+.navbar-inverse {
+  background-color: #222;
+  background-image: none;
+}
 
-      .navbar-inverse .navbar-nav>.active>a {
-        background-color: #444;
-        background-image: none; 
-      }
+.navbar-inverse .navbar-nav>.active>a {
+  background-color: #444;
+  background-image: none; 
+}
 
-      .navbar-inverse .navbar-brand {
-        color: #FFF;
-      }
+.navbar-inverse .navbar-brand {
+  color: #FFF;
+}
 
-      .navbar-inverse .navbar-brand, .navbar-inverse .navbar-nav>li>a {
-        text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.25);
-      }
+.navbar-inverse .navbar-brand, .navbar-inverse .navbar-nav>li>a {
+  text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.25);
+}
 
-      h1 {
-        margin-top: 10px;
-      }
+h1 {
+  margin-top: 10px;
+}
+
+#sensors-list {
+  max-width: 800px;
+}

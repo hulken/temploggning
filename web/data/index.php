@@ -28,7 +28,7 @@ $api->put('/sensor/:id', function ($id) use ($api) {
 	$request = $api->request();
 	$json = json_decode($request->getBody());
 	if(isset($json->name)) {
-    	$sensors->update($id, $json->name);
+    	echo($sensors->update($id, $json->name));
     }
 });
 // -------------------

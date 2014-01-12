@@ -49,7 +49,11 @@ TempChart.DataHandler.prototype = {
 			console.log('EVENT READ LOAD_SENSORS ::');
 			me.loadSensors(); 
 		});
-		
+
+		$(document).bind('TempChart_update_sensor', function(e, sensor) { 
+			console.log('EVENT READ UPDATE SENSOR ::', sensor);
+			me.updateSensor(sensor);
+		});		
 	},
 
 	/* loadSensors
@@ -97,7 +101,6 @@ TempChart.DataHandler.prototype = {
 		me.doRequest({
 			url: data_url + '?' + $.param(params)
 		},function(dataArray) {
-			console.log('CALLBACK DATA LOADED ::', dataArray);
 			me.nrOfLoadedDataSources++;
             $.each(dataArray, function(j, data) {
                 var seriesData;
@@ -140,7 +143,14 @@ TempChart.DataHandler.prototype = {
 	* 	@param 	sensor 	
 	*/
 	updateSensor: function(sensor) {
+		this.doRequest({
+			url: this.DATA_URL + 'sensor/' + sensor.sensor_id,
+			type: 'PUT',
+			contentType: 'application/json',
+			data: JSON.stringify(sensor),
+		}, function(data) {
 
+		});
 	},
 
 	doRequest: function(options, callback) {
@@ -148,7 +158,12 @@ TempChart.DataHandler.prototype = {
 			$.extend({dataType: 'json'},options))
 			.done(function(data) {
 				if(typeof data === 'object') {
-					callback(data);
+					console.log('FUNCTION CALLBACK ::', data);
+					if(data.error) {
+						$(document).trigger('TempChart_error', [data.error]);	
+					} else {
+						callback(data);
+					}
 				} else {
 					$(document).trigger('TempChart_error', ['Inget data returnerades från servern.']);	
 				}
