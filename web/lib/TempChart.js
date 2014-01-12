@@ -21,10 +21,11 @@ var TempChart = TempChart ||
 		}
 		console.log('INIT TempChart ::', options);
 
-		this.dataHandler = new TempChart.DataHandler({
-			DATA_URL: this.DATA_URL,
-			USE_CACHE: this.USE_CACHE
-		});
+		this.dataHandler = new TempChart.DataHandler(options);
+
+		if(this.GA_TRACKING_CODE) {
+			this.googleAnalytics = new TempChart.GoogleAnalytics(options);
+		}
 
 		// Bind GUI and APP events
 		this.bindEvents();
@@ -39,6 +40,7 @@ TempChart.prototype = {
 	DATA_URL: 'data/', // URL to load data from
 	USE_CACHE: true, // Use serverside json-cache
 	DEBUG: false,
+	GA_TRACKING_CODE: null, // Google Analytics tracking code
 
 	// Varibles
 	// ---------------
