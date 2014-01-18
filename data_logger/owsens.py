@@ -38,7 +38,7 @@ def listSensors():
     #print '-------'
 
     if(sensor.type in ['DS18B20', 'DS18S20']):
-      parsedSensors['sensor'].append({'id': sensor.address, 'name': sensor.id})
+      parsedSensors['sensor'].append({'id': sensor.address, 'name': sensor.id, 'sensor_type': 'temp' })
   
 
   return parsedSensors
