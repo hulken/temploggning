@@ -17,8 +17,8 @@ class Sensors {
 		return json_encode($sensors);
 	}
 
-	public function update($id, $name) {
-		$query = "UPDATE sensors SET name='$name' WHERE sensor_id=$id;";
+	public function update($sensor_id, $name, $id, $color) {
+		$query = "UPDATE sensors SET name='$name', id='$id', color='$color' WHERE sensor_id=$sensor_id;";
 		$result = mysql_query($query);
 		if($result == FALSE) {
 			return '{ error: ' +  mysql_error() + '}';	
