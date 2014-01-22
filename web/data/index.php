@@ -2,6 +2,8 @@
 include_once 'Slim/Slim.php';
 include_once 'settings.php';
 include_once 'Readings.php';
+include_once 'Sensors.php';
+
 // Initiate Slim framework
 \Slim\Slim::registerAutoloader();
 
