@@ -11,7 +11,7 @@ $api = new \Slim\Slim();
 
 // Readings
 // -------------------
-$api->get('/', function () {
+$api->get('/readings', function () {
     $readings = new Readings();
     echo($readings->read());
 });
