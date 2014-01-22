@@ -14,7 +14,7 @@ def _getSensors():
   #ow.finish()
   return response
 
-def listSensors():
+def listSensors(debug):
   # Get sensor list
   response = _getSensors()
 
@@ -43,13 +43,16 @@ def listSensors():
 
   return parsedSensors
 
-def infoSensor(sensorId):
+def infoSensor(sensorId, debug):
   # Get sensor list
   response = _getSensors()
   parsedInfo = { 'lastUpdated': int(time.time()), 'data': [] }
   for sensor in response:
     if(sensor.address == sensorId):
-      parsedInfo['data'].append({'value': sensor.temperature })
+      parsedInfo['data'].append({
+        'value': sensor.temperature, 
+        'name': 'temp'
+      })
 
   return parsedInfo
 

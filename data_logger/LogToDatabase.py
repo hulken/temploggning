@@ -111,6 +111,15 @@ if(config is not None):
                     debug("Sensor already up to date. Skipping DB insert")
                     continue
                 
+                # Log to file
+                debug(config['log_to_file']['sensor_id'] + '=' + str(sensor_db_id));
+                if (config['log_to_file']['do_log_to_file'] 
+                    and config['log_to_file']['sensor_id'] 
+                    and config['log_to_file']['sensor_id'] == str(sensor_db_id)):
+                    with open(config['log_to_file']['file'], 'w') as f:
+                        debug("Writing to file " + config['log_to_file']['file'] + " temp:" + temp);
+                        f.write(str(temp).strip())
+
                 # Insert the reading to the database
                 debug("Attempting to insert sensor_id: " + str(sensor_db_id) + ", date: " + str(lastUpdatedDate) + ", value: " + str(temp))
                 cursor.execute("INSERT INTO readings (sensor_id, date, temp) VALUES (%s, %s, %s)", (sensor_db_id, lastUpdatedDate, temp))
