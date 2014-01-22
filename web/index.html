@@ -118,6 +118,7 @@
     <script src="lib/TempChart.js"></script>
     <script src="lib/TempChart/Charter.js"></script>
     <script src="lib/TempChart/DataHandler.js"></script>
+    <script src="lib/TempChart/GoogleAnalytics.js"></script>
 
     <script>
       var tempChart = null;
@@ -130,17 +131,16 @@
             CONTROLS_ELEMNT_ID: 'controls',
             DATA_URL: [
                         'data/'
-                        //,'markusdata', 'drakkedata'
             ],
             USE_CACHE: false,
-            DEBUG: true
+            DEBUG: true,
+            GA_TRACKING_CODE: null
           });
 
           tempChart.initCharter();
 
       });
     </script>
-    <script src="GoogleAnalytics.js"></script>
 <!-- SCRIPTS END -->    
   </body>
 </html>
