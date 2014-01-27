@@ -29,13 +29,13 @@ class Readings
 		}
 		
 		if ($period >= 1) {
-			if ($period >= 365) {
+			if ($period >= 1825) {
 				$d = "%Y-%m"; // Group by month
 			} 
-			else if($period >= 60) {
+			if ($period >= 120) {
 				$d = "%Y %u"; // Group by week
 			} 
-			else if($period >= 30) {
+			else if ($period >= 30) {
 				$d = "%Y-%m-%d"; // Group by day
 			}
 			else if ($period >= 7) {
