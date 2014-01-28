@@ -54,7 +54,7 @@
      Most important is the type of logger_type!
      And also database: host, user, password, database
     
-    Run the script (Prerequisites: The database table schema (v3) need to be in place before running the script. The script also need to be runneble with: chmod +x LogToDatabase.py)
+    Run the script (Prerequisites: The database table schema (v4) need to be in place before running the script. The script also need to be runneble with: chmod +x LogToDatabase.py)
      ./LogToDatabase.py
     
     
