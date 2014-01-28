@@ -75,6 +75,7 @@ class Readings
 	                        . " SELECT MAX(date) AS date, sensor_id FROM readings GROUP BY sensor_id"
 	                        . " ) AS i ON i.date = r.date AND i.sensor_id = r.sensor_id"
 	                        . " RIGHT JOIN sensors s ON s.sensor_id = r.sensor_id"
+	                        . " WHERE s.hidden = false"
 	                        . " ORDER BY sensor_id, date ASC";
 			}
 			else { // List of readings
@@ -87,7 +88,7 @@ class Readings
 
 					$query = "SELECT UNIX_TIMESTAMP(r.date) AS date, AVG(r.temp) AS temp, s.sensor_id, s.name, s.color, s.sensor_type FROM readings r"
 							. "	LEFT JOIN sensors s ON r.sensor_id = s.sensor_id"
-							. "	WHERE $where"
+							. "	WHERE $where AND s.hidden = false"
 							. "	GROUP BY $groupby"
 							. "	ORDER BY s.sensor_id, r.date ASC";
 			}
