@@ -76,7 +76,10 @@ TempChart.Charter.prototype = {
 			}
 		}
 	},
-
+	HOURS: ['NULL','00:00','01:00', '02:00', '03:00', '04:00', '05:00', '06:00', '07:00', '08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00', '19:00', '20:00', '21:00', '22:00', '23:00', '00:00'],
+  WEEKDAYS: ['NULL','Man', 'Tis', 'Ons', 'Tor', 'Fre', 'Lor', 'Son'],
+	MONTHS: ['NULL', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+  xAxisCATEGORIES: [],
 	// Varibles
 	// ---------------
 	$mainElement: null,
@@ -100,6 +103,20 @@ TempChart.Charter.prototype = {
 		$(document).bind('TempChart_readings_loaded', function(e, series, period) {
 			if(period === 'latest') {
 				me.visualizeSingleValuesView(series);
+			} else if (period === 'statistics-avg-hour' || period === 'statistics-avg-weekday' || period === 'statistics-avg-month' ){
+        //Set xAxis labels
+        if (period === 'statistics-avg-hour') { me.xAxisCATEGORIES = me.HOURS; }
+        if (period === 'statistics-avg-weekday') { me.xAxisCATEGORIES = me.WEEKDAYS; }
+        if (period === 'statistics-avg-month') { me.xAxisCATEGORIES = me.MONTHS; }
+        
+					me._createStatisticsView(series);		
+					// Hide not choosen series from cookie
+		      	$.each(me.chart.series, function(i, serie) {
+		        	var cookieValue = me.getCookie(serie.name);
+		          	if (cookieValue == 'false') {
+		              	serie.setVisible(false);
+		          	}
+		      	});	
 			} else {
 				me.createChartView(series); 
 
@@ -111,7 +128,6 @@ TempChart.Charter.prototype = {
 		          	}
 		      	});
 	      	}
-			
 		});
 
 		window.onhashchange = function() {
@@ -151,6 +167,12 @@ TempChart.Charter.prototype = {
 			this._createCompareView();
 		} else if(period === 'custom') {
 			this._createCustomView();
+		} else if (period === 'statistics-avg-hour' || period === 'statistics-avg-weekday' || period === 'statistics-avg-month'  ) {
+      this.startAutoRefresh();
+			this._createStatisticsView();
+			this.$controlsElement.html('');
+			console.log('EVENT FIRE LOAD_READINGS ::', period);
+			$(document).trigger('TempChart_load_readings', [period]);
 		} else {
 			this.startAutoRefresh();
 			this.$controlsElement.html('');
@@ -426,6 +448,139 @@ TempChart.Charter.prototype = {
 	      pick12HourFormat: false
 	    });
 	},
+	
+		/* _createStatisticsView
+	 * 
+	 */
+	_createStatisticsView: function(series) {   
+		var me = this;
+        this.chart = new Highcharts.Chart({
+        	credits: { enabled: false },
+            chart: {
+                renderTo: this.MAIN_ELEMENT_ID,
+                type: 'spline'
+            },
+            colors: me.LINE_COLORS,
+            title: {
+                text: ''
+            },
+            subtitle: {
+                text: ''
+            },
+            legend: {
+			    itemStyle: {
+			        color: '#000000',
+			        fontFamily: 'Helvetica, Arial, Verdana, sans-serif', // default font
+					fontSize: '16px'
+			    }
+			},
+            xAxis: {
+                categories: this.xAxisCATEGORIES,
+                labels: {
+	                style: {
+			        	fontFamily: 'Helvetica, Arial, Verdana, sans-serif', // default font
+						fontSize: '14px'
+					}
+				}
+            },
+            yAxis: [{ // Primary axis
+				labels: {
+                    formatter: function() {
+                        return this.value + ' \u00B0C';
+                    },
+                    style: {
+			        	fontFamily: 'Helvetica, Arial, Verdana, sans-serif', // default font
+						fontSize: '14px',
+						color: '#000000'
+                    }
+                },
+                title: {
+                    text: this.strings.temperature,
+                    style: {
+						fontFamily: 'Helvetica, Arial, Verdana, sans-serif', // default font
+						fontSize: '14px',
+						color: '#000000'
+                    }
+                },
+                plotLines:[{
+                    value:0,
+                    color: 'rgba(255, 0, 0, 0.15)',
+                    width:5,
+                    zIndex:1
+                }],
+                plotBands: [{ // Light air
+                    from: -40,
+                    to: 0,
+                    color: 'rgba(68, 170, 213, 0.05)',
+                }]
+            }, { // Secondary yAxis
+                gridLineWidth: 0,
+                title: {
+                    text: this.strings.humidity,
+                    style: {
+			        	fontFamily: 'Helvetica, Arial, Verdana, sans-serif', // default font
+						fontSize: '14px',
+						color: '#000000'
+                    }
+                },
+                labels: {
+                    formatter: function() {
+                        return this.value +' %';
+                    },
+                    style: {
+			        	fontFamily: 'Helvetica, Arial, Verdana, sans-serif', // default font
+						fontSize: '14px',
+						color: '#000000'
+                    }
+                },
+                opposite: true
+			}],
+            tooltip: {
+                formatter: function() {
+                	var unit = '\u00B0C';
+
+                	if (this.series.yAxis.userOptions.index == 1) { // humidity
+                		unit = '%';
+                	}
+
+                    return '<b>'+ this.series.name + '</b> <br/>' +
+                        this.x + ' <b>' + this.y.toFixed(2) + ' ' + unit + '</b>';
+                }
+            },
+			plotOptions: {
+                spline: {
+                    events: {
+                      legendItemClick: function () {
+                        me.setCookie(this.name, !this.visible, 7);
+                      }
+                    },
+                    lineWidth: 2,
+                    states: {
+                        hover: {
+                            lineWidth: 5
+                        }
+                    },
+                    marker: {
+                        enabled: false,
+                        states: {
+                            hover: {
+                                enabled: true,
+                                symbol: 'circle',
+                                radius: 5,
+                                lineWidth: 1
+                            }
+                        }
+                    }
+                }
+            },
+            
+            series: series
+        });
+
+		$(document).trigger('TempChart_in_progress', [false]);
+	},
+	
+
 
 
 	/* _createCompareView
@@ -507,6 +662,9 @@ TempChart.Charter.prototype = {
 			case '#custom':
 			case '#compare':
 			case '#latest': 
+			case '#statistics-avg-hour': 
+			case '#statistics-avg-weekday': 
+			case '#statistics-avg-month': 
 				return hash.replace('#','');
 				break;
 			case '#day': 
@@ -520,7 +678,7 @@ TempChart.Charter.prototype = {
 				break;
 			case '#year': 
 				return 100000;
-				break;
+				break;	
 			default:
 				return 'latest'; // Start view
 				break;
