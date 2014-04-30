@@ -41,6 +41,7 @@ CREATE TABLE IF NOT EXISTS `sensors` (
   `date` datetime NOT NULL,
   `sensor_type` int NOT NULL,
   `sensor_unit` varchar(200) NOT NULL,
+  `hidden` tinyint(1) NOT NULL,
   PRIMARY KEY (`sensor_id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 

@@ -1,5 +1,5 @@
 -- Note: You need to set the correct current version below!!!!
-DECLARE @current_version int = 2;
+DECLARE @current_version int = 3;
 
 IF (@current_version == 1) BEGIN
 	-- Create new readings table
@@ -54,5 +54,11 @@ ELSE IF (@current_version == 2) BEGIN
 		ADD UNIQUE  `ix_id` (  `id` ,  `sensor_type` )
 END
 ELSE IF (@current_version == 3) BEGIN
+
+	-- Add new column to sensors-table
+	ALTER TABLE  `sensors` ADD  `hidden` BOOLEAN NOT NULL
+	
+END
+ELSE IF (@current_version == 4) BEGIN
 	PRINT 'Your database schema is already up to date';
 END

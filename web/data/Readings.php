@@ -29,13 +29,13 @@ class Readings
 		}
 		
 		if ($period >= 1) {
-			if ($period >= 365) {
+			if ($period >= 1825) {
 				$d = "%Y-%m"; // Group by month
 			} 
-			else if($period >= 60) {
+			if ($period >= 120) {
 				$d = "%Y %u"; // Group by week
 			} 
-			else if($period >= 30) {
+			else if ($period >= 30) {
 				$d = "%Y-%m-%d"; // Group by day
 			}
 			else if ($period >= 7) {
@@ -75,19 +75,34 @@ class Readings
 	                        . " SELECT MAX(date) AS date, sensor_id FROM readings GROUP BY sensor_id"
 	                        . " ) AS i ON i.date = r.date AND i.sensor_id = r.sensor_id"
 	                        . " RIGHT JOIN sensors s ON s.sensor_id = r.sensor_id"
+	                        . " WHERE s.hidden = false"
 	                        . " ORDER BY sensor_id, date ASC";
 			}
+			else if (isset($_GET['period']) && $_GET['period'] == 'statistics-avg-hour') { // List of statistics readings hourperday
+					$query = "SELECT EXTRACT(HOUR FROM CONVERT_TZ(r.date,'+00:00','+01:00'))+1 AS date, AVG(r.temp) AS temp, s.sensor_id, s.name, s.color, s.sensor_type FROM readings r"
+							. "	LEFT JOIN sensors s ON r.sensor_id = s.sensor_id"
+							. "	WHERE s.hidden = false"
+							. "	GROUP BY r.sensor_id, date"
+							. "	ORDER BY s.sensor_id, date ASC";
+			}
+			else if (isset($_GET['period']) && $_GET['period'] == 'statistics-avg-weekday') { // List of statistics readings dayperweek
+					$query = "SELECT WEEKDAY(CONVERT_TZ(r.date,'+00:00','+01:00'))+1 AS date, AVG(r.temp) AS temp, s.sensor_id, s.name, s.color, s.sensor_type FROM readings r"
+							. "	LEFT JOIN sensors s ON r.sensor_id = s.sensor_id"
+							. "	WHERE s.hidden = false"
+							. "	GROUP BY r.sensor_id, date"
+							. "	ORDER BY s.sensor_id, date ASC";
+			}
+			else if (isset($_GET['period']) && $_GET['period'] == 'statistics-avg-month') { // List of statistics readings dayyear
+					$query = "SELECT EXTRACT( MONTH FROM CONVERT_TZ(r.date,'+00:00','+01:00') ) AS date, AVG(r.temp) AS temp, s.sensor_id, s.name, s.color, s.sensor_type FROM readings r"
+							. "	LEFT JOIN sensors s ON r.sensor_id = s.sensor_id"
+							. "	WHERE s.hidden = false"
+							. "	GROUP BY r.sensor_id, date"
+							. "	ORDER BY r.sensor_id, date ASC";
+			}
 			else { // List of readings
-	                //$query = "SELECT UNIX_TIMESTAMP(i.date) AS date, i.sensor_id, r.temp, s.name, s.color FROM readings r"
-	                //        . " RIGHT JOIN ("
-	                //        . " SELECT date, sensor_id FROM readings WHERE $where $groupby"
-	                //        . " ) AS i ON i.date = r.date AND i.sensor_id = r.sensor_id"
-	                //        . " RIGHT JOIN sensors s ON s.sensor_id = r.sensor_id"
-	                //        . " ORDER BY sensor_id, date ASC";
-
 					$query = "SELECT UNIX_TIMESTAMP(r.date) AS date, AVG(r.temp) AS temp, s.sensor_id, s.name, s.color, s.sensor_type FROM readings r"
 							. "	LEFT JOIN sensors s ON r.sensor_id = s.sensor_id"
-							. "	WHERE $where"
+							. "	WHERE $where AND s.hidden = false"
 							. "	GROUP BY $groupby"
 							. "	ORDER BY s.sensor_id, r.date ASC";
 			}
@@ -120,8 +135,14 @@ class Readings
 	                
 	                $lastId = intval($row['sensor_id']);
 	            }
-	            
-	            if (intval($row['date']) > 0) {
+	            // We don't want to add seconds for statistics
+	            if (isset($_GET['period']) && ($_GET['period'] == 'statistics-avg-hour' || $_GET['period'] == 'statistics-avg-weekday' || $_GET['period'] == 'statistics-avg-month' ) && intval($row['date']) > 0)
+	            {
+                	$containData = true;
+	                array_push($arr, array((intval($row['date'])), floatval($row['temp'])));
+	            }
+	            // Add seconds
+	            else if (intval($row['date']) > 0) {
 	                $containData = true;
 	                array_push($arr, array((intval($row['date']) * 1000), floatval($row['temp'])));
 	            }
