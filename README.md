@@ -7,7 +7,9 @@ Three parts containing a data logger, database and webbased view interface
 
 ### [Visuals](web)
 
-Highchars packaged in a responsive Bootstrap interface.
+Highcharts packaged in a responsive Bootstrap interface.
+
+**[Live demo](http://hultman.no-ip.org/)**
 
 
 ### [Logging](data_logger)
