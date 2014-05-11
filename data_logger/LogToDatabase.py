@@ -31,6 +31,9 @@ if(config is not None):
     if(config["logger_type"] == "tellstick"):
         import tdsens
         logger = tdsens
+    elif(config["logger_type"] == "tellstick_local"):
+        import tdsens_local
+        logger = tdsens_local
     elif(config["logger_type"] == "1wire"):
         import owsens
         logger = owsens
@@ -43,7 +46,7 @@ if(config is not None):
 
     # Get all sensors from API
     logger.readSettings()
-    response = logger.listSensors(False)
+    response = logger.listSensors(_debug)
 
     db = mysql.connector.connect(host=config["db"]["host"], user=config["db"]["user"], password=config["db"]["password"], database=config["db"]["database"], buffered=True)
 
@@ -84,7 +87,7 @@ if(config is not None):
             
             # Get the current sensor information from API
             #reading = subprocess.check_output(["tdsens.py", "-i " + line], shell=True)
-            reading = logger.infoSensor(id, False)    
+            reading = logger.infoSensor(id, _debug)    
 
             lastUpdated = reading['lastUpdated']
             lastUpdatedReadable = datetime.datetime.fromtimestamp(int(lastUpdated)).strftime("%Y-%m-%d %H:%M:%S")
@@ -112,8 +115,8 @@ if(config is not None):
                     continue
                 
                 # Log to file
-                debug(config['log_to_file']['sensor_id'] + '=' + str(sensor_db_id));
                 if (config['log_to_file']['do_log_to_file'] 
+                    and config['log_to_file']['do_log_to_file'] != "false"
                     and config['log_to_file']['sensor_id'] 
                     and config['log_to_file']['sensor_id'] == str(sensor_db_id)):
                     with open(config['log_to_file']['file'], 'w') as f:
