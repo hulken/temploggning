@@ -21,7 +21,7 @@ class Readings
 		if(isset($_GET['period'])) {
 			$period = $_GET['period'];
 			
-			if($period === 'latest'){
+			if($period === 'latest' || $period === 'statistics-minmax'){
 				$period = 10000;
 			}
 		} else if(!isset($period)){
@@ -49,7 +49,7 @@ class Readings
 		}
 		
 		if(isset($_GET['from']) && isset($_GET['to'])) {
-			$where = "r.date BETWEEN FROM_UNIXTIME(" . $_GET['from'] . ") AND FROM_UNIXTIME(" . $_GET['to'] . ")";
+			$where = "FROM_UNIXTIME(" . $_GET['from'] . ") <= date && FROM_UNIXTIME(" . $_GET['to'] . ") > r.date ";
 		} else {
 			$where = "DATE_SUB(NOW(),INTERVAL " . $period ." DAY) <= r.date ";
 		}
@@ -120,6 +120,23 @@ class Readings
 	        $lastSensorType;
 	        $containData = false;
 	        
+	    if(isset($_GET['period']) && ($_GET['period'] == 'statistics-minmax'))
+	    {
+	    // TODO
+			while($row = mysql_fetch_array($result)) 
+			{
+	                 array_push($collection, array($row['sensor_id'], $row['maxval'], $row['minval']));
+	            
+	            $lastName = $row['maxval'];
+	            $lastColor = $row['minval'];
+	            $lastSensorType = $row['sensor_id'];
+			}
+			if(isset($lastId) && isset($lastName) && isset($lastColor)) {
+	        	//array_push($collection, array($lastId, $lastName, $lastColor, $lastSensorType, $arr));
+	        }
+	    }
+	    else
+	    {  
 			while($row = mysql_fetch_array($result)) 
 			{
 	            if (intval($row['sensor_id']) != $lastId) {                
@@ -155,6 +172,7 @@ class Readings
 
 			if ($lastId >= 0 && $containData) {
 	        	array_push($collection, array($lastId, utf8_encode($lastName), utf8_encode($lastColor), $lastSensorType, $arr));
+	        }
 	        }
 	        
 			$outStr = json_encode($collection);
