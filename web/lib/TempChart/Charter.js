@@ -267,13 +267,13 @@ TempChart.Charter.prototype = {
 						color: '#000000'
                     }
                 },
-                plotLines:[{
-                    value:0,
+                plotLines:[{ // Zero degrees-line
+                    value: 0,
                     color: 'rgba(255, 0, 0, 0.15)',
-                    width:5,
-                    zIndex:1
+                    width: 5,
+                    zIndex: 1
                 }],
-                plotBands: [{ // Light air
+                plotBands: [{ // Cool temperatures
                     from: -40,
                     to: 0,
                     color: 'rgba(68, 170, 213, 0.05)',
