@@ -27,7 +27,7 @@ TempChart.DataHandler.prototype = {
 
 	// Constants
 	// ---------------
-	DATA_URL: 'data', // URL to load data from
+	DATA_URL: 'data\index.php', // URL to load data from
 	USE_CACHE: true, // Use serverside json-cache
 	LANGUAGE: {
 		DEFAULT: 'sv',
@@ -57,6 +57,11 @@ TempChart.DataHandler.prototype = {
 		$(document).bind('TempChart_load_readings', function(e, period, from, to) { 
 			console.log('EVENT READ LOAD_READINGS ::', period, from, to);
 			me.loadReadings(period, from, to); 
+		});
+		
+		$(document).bind('TempChart_load_customReadings', function(e, question) { 
+			console.log('EVENT READ LOAD_CUSTOMREADINGS ::');
+			me.loadCustomReadings(question); 
 		});
 
 		$(document).bind('TempChart_load_sensors', function(e) { 
@@ -100,6 +105,51 @@ TempChart.DataHandler.prototype = {
 			};
 		}
 	},
+	
+	loadCustomReadings: function(question) {
+		this.series = []; // Reset data series
+		this.nrOfLoadedDataSources = 0;
+		if(typeof this.DATA_URL === 'string') {
+			this.doLoadCustomReadings(this.DATA_URL, question);
+		} else {
+			for (var i = 0; i < this.DATA_URL.length; i++) {
+				this.doLoadCustomReadings(this.DATA_URL[i], question);
+			};
+		}
+	},
+	
+	doLoadCustomReadings: function(data_url, question) {
+		$(document).trigger('TempChart_in_progress', [true]);
+		var me = this; 		
+		var params = {
+		    tempstring: (new Date()).getTime(),
+		};
+
+		if(typeof me.USE_CACHE !== 'undefined') { params.usecache = me.USE_CACHE; }
+		if(typeof question !== 'undefined' && question !== null) { params.question = question; }
+		me.doRequest({
+			url: 'data/index.php/customreadings?' + $.param(params)
+		},function(dataArray) {
+			me.nrOfLoadedDataSources++;
+            $.each(dataArray, function(j, data) {
+                me.series.push({
+                    data: data,
+	                	sensor: me.sensors,
+	                	sensor2: this.sensors,
+	                	tooltip: {
+		                    valueSuffix: ' \u00B0C'
+		                }
+		            	});
+				
+				
+            });
+            if(typeof me.DATA_URL !== 'string' && me.nrOfLoadedDataSources === me.DATA_URL.length) {
+				$(document).trigger('TempChart_readings_loaded', [me.series, question]);
+				console.log('EVENT FIRE CUSTOMREADINGS_LOADED ::', me.series, question);
+			}
+		});
+	},
+	
 
 	doLoadReadings: function(data_url, period, from, to, last_load) {
 		$(document).trigger('TempChart_in_progress', [true]);
@@ -144,7 +194,20 @@ TempChart.DataHandler.prototype = {
 		                },
 	                	data: seriesData
 					});
+				}			
+				else if (data[3] == 2) { // electricity
+					me.series.push({
+	                	name: data[1],
+	                	color: data[2],
+	                	yAxis: 2,
+	                	dashStyle: 'ShortDash',
+	                	tooltip: {
+		                    valueSuffix: ' w'
+		                },
+	                	data: seriesData
+					});
 				}
+				
             });
             if(typeof me.DATA_URL !== 'string' && me.nrOfLoadedDataSources === me.DATA_URL.length) {
 				$(document).trigger('TempChart_readings_loaded', [me.series, period]);

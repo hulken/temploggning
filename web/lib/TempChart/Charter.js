@@ -71,6 +71,7 @@ TempChart.Charter.prototype = {
 				from: 'Fr&aring;n',
 				humidity: 'Luftfuktighet',
 				temperature: 'Temperatur',
+				electricity: 'Elektricitet',
 				update: 'Uppdatera',
 				to: 'Till'
 			}
@@ -103,6 +104,8 @@ TempChart.Charter.prototype = {
 		$(document).bind('TempChart_readings_loaded', function(e, series, period) {
 			if(period === 'latest') {
 				me.visualizeSingleValuesView(series);
+			} else if(period === 'statistics-minmax') {
+				me.visualizeMinMaxView(series);
 			} else if (period === 'statistics-avg-hour' || period === 'statistics-avg-weekday' || period === 'statistics-avg-month' ){
         //Set xAxis labels
         if (period === 'statistics-avg-hour') { me.xAxisCATEGORIES = me.HOURS; }
@@ -165,7 +168,13 @@ TempChart.Charter.prototype = {
 
 		if(period === 'compare') {
 			this._createCompareView();
-		} else if(period === 'custom') {
+		}
+		else if (period === 'statistics-minmax') {
+			this.$controlsElement.html('');
+			console.log('EVENT FIRE LOAD_CUSTOMREADINGS ::', period);
+			$(document).trigger('TempChart_load_customReadings', [period]);
+		}
+		 else if(period === 'custom') {
 			this._createCustomView();
 		} else if (period === 'statistics-avg-hour' || period === 'statistics-avg-weekday' || period === 'statistics-avg-month'  ) {
       this.startAutoRefresh();
@@ -211,6 +220,32 @@ TempChart.Charter.prototype = {
 
 		$(document).trigger('TempChart_in_progress', [false]);
 	},
+	
+	/* visualizeMinMaxValuesView
+	 * @param 	series 		array 		highcharts data series array
+	 */
+	visualizeMinMaxView: function(series) {
+
+		var me = this;
+		//me._sortSeries(series);
+		me.$controlsElement.html('');
+		
+		var spacerAdded = false;
+		var colorClass = 'header-black';
+		var tableStr = '<table class="table latest-table table-responsive"><tbody>';
+		
+		tableStr += '<tr>' + '<td><b>Matare</b></td>'+ '<td><b>Min-Datum</b></td>'+ '<td><b>Min-varde</b></td>'+ '<td><b>Medelvarde senaste 24h</b></td>'+ '<td><b>Max-datum</b></td>'+ '<td><b>Maxvarde</b></td>'  + '<tr>';
+		$.each(series, function(i, serie) {
+        //console.log(serie);
+        tableStr += '<tr>' + '<td>'+serie.data['name']+'</td>'+ '<td>'+serie.data['mindaydate']+'</td>'+ '<td>'+Math.round(serie.data['minval'] * 100) / 100+'</td>'+ '<td>'+Math.round(serie.data['avgvalue'] * 100) / 100+'</td>'+ '<td>'+serie.data['maxdaydate']+'</td>'+ '<td>'+Math.round(serie.data['maxval'] * 100) / 100+'</td>'  + '<tr>';
+		});
+
+		tableStr += '</tbody></table>';
+		me.$mainElement.html(tableStr);
+
+		$(document).trigger('TempChart_in_progress', [false]);
+	},
+
 
 	/* createChartView
 	 * 
@@ -223,8 +258,7 @@ TempChart.Charter.prototype = {
         	credits: { enabled: false },
             chart: {
                 renderTo: this.MAIN_ELEMENT_ID,
-                type: 'spline',
-                zoomType: 'x'
+                type: 'spline'
             },
             colors: me.LINE_COLORS,
             title: {
@@ -268,13 +302,13 @@ TempChart.Charter.prototype = {
 						color: '#000000'
                     }
                 },
-                plotLines:[{ // Zero degrees-line
-                    value: 0,
+                plotLines:[{
+                    value:0,
                     color: 'rgba(255, 0, 0, 0.15)',
-                    width: 5,
-                    zIndex: 1
+                    width:5,
+                    zIndex:1
                 }],
-                plotBands: [{ // Cool temperatures
+                plotBands: [{ // Light air
                     from: -40,
                     to: 0,
                     color: 'rgba(68, 170, 213, 0.05)',
@@ -300,6 +334,27 @@ TempChart.Charter.prototype = {
                     }
                 },
                 opposite: true
+			}, { // Third yAxis
+                gridLineWidth: 0,
+                title: {
+                    text: this.strings.electricity,
+                    style: {
+			        	fontFamily: 'Helvetica, Arial, Verdana, sans-serif', // default font
+						fontSize: '14px',
+						color: '#000000'
+                    }
+                },
+                labels: {
+                    formatter: function() {
+                        return this.value +' w';
+                    },
+                    style: {
+			        	fontFamily: 'Helvetica, Arial, Verdana, sans-serif', // default font
+						fontSize: '14px',
+						color: '#000000'
+                    }
+                },
+                opposite: true
 			}],
             tooltip: {
                 formatter: function() {
@@ -307,6 +362,9 @@ TempChart.Charter.prototype = {
 
                 	if (this.series.yAxis.userOptions.index == 1) { // humidity
                 		unit = '%';
+                	}
+                	if (this.series.yAxis.userOptions.index == 2) { // electricity
+                		unit = 'w';
                 	}
 
                     return '<b>'+ this.series.name + '</b> <br/>' +
@@ -444,7 +502,7 @@ TempChart.Charter.prototype = {
 			'</form>';
 		this.$controlsElement.html(str);
 		$('.datetimepicker').datetimepicker({
-	      language: 'sv-SE',
+	      language: 'pt-BR',
 	      pickSeconds: false,
 	      pick12HourFormat: false
 	    });
@@ -535,6 +593,27 @@ TempChart.Charter.prototype = {
                     }
                 },
                 opposite: true
+			}, { // Third yAxis
+                gridLineWidth: 0,
+                title: {
+                    text: this.strings.electricity,
+                    style: {
+			        	fontFamily: 'Helvetica, Arial, Verdana, sans-serif', // default font
+						fontSize: '14px',
+						color: '#000000'
+                    }
+                },
+                labels: {
+                    formatter: function() {
+                        return this.value +' w';
+                    },
+                    style: {
+			        	fontFamily: 'Helvetica, Arial, Verdana, sans-serif', // default font
+						fontSize: '14px',
+						color: '#000000'
+                    }
+                },
+                opposite: true
 			}],
             tooltip: {
                 formatter: function() {
@@ -542,6 +621,9 @@ TempChart.Charter.prototype = {
 
                 	if (this.series.yAxis.userOptions.index == 1) { // humidity
                 		unit = '%';
+                	}
+                	if (this.series.yAxis.userOptions.index == 2) { // electricity
+                		unit = 'w';
                 	}
 
                     return '<b>'+ this.series.name + '</b> <br/>' +
@@ -663,6 +745,7 @@ TempChart.Charter.prototype = {
 			case '#custom':
 			case '#compare':
 			case '#latest': 
+			case '#statistics-minmax': 
 			case '#statistics-avg-hour': 
 			case '#statistics-avg-weekday': 
 			case '#statistics-avg-month': 
