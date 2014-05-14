@@ -123,8 +123,8 @@ class Readings
 	    if(isset($_GET['period']) && ($_GET['period'] == 'statistics-minmax'))
 	    {
 	    // TODO
-        while($row = mysql_fetch_array($result)) 
-        {
+			while($row = mysql_fetch_array($result)) 
+			{
 	                 array_push($collection, array($row['sensor_id'], $row['maxval'], $row['minval']));
 	            
 	            $lastName = $row['maxval'];
@@ -142,7 +142,7 @@ class Readings
 	            if (intval($row['sensor_id']) != $lastId) {                
 	                if (isset($arr)) {
 	                    if ($lastId >= 0 && $containData) {
-	                        array_push($collection, array($lastId, $lastName, $lastColor, $lastSensorType, $arr));
+	                        array_push($collection, array($lastId, utf8_encode($lastName), utf8_encode($lastColor), $lastSensorType, $arr));
 	                    }
 	                    
 	                    unset($arr);
@@ -152,6 +152,7 @@ class Readings
 	                
 	                $lastId = intval($row['sensor_id']);
 	            }
+
 	            // We don't want to add seconds for statistics
 	            if (isset($_GET['period']) && ($_GET['period'] == 'statistics-avg-hour' || $_GET['period'] == 'statistics-avg-weekday' || $_GET['period'] == 'statistics-avg-month' ) && intval($row['date']) > 0)
 	            {
@@ -168,9 +169,9 @@ class Readings
 	            $lastColor = $row['color'];
 	            $lastSensorType = $row['sensor_type'];
 			}
-			
-			if(isset($lastId) && isset($lastName) && isset($lastColor)) {
-	        	array_push($collection, array($lastId, $lastName, $lastColor, $lastSensorType, $arr));
+
+			if ($lastId >= 0 && $containData) {
+	        	array_push($collection, array($lastId, utf8_encode($lastName), utf8_encode($lastColor), $lastSensorType, $arr));
 	        }
 	        }
 	        
