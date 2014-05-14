@@ -258,7 +258,8 @@ TempChart.Charter.prototype = {
         	credits: { enabled: false },
             chart: {
                 renderTo: this.MAIN_ELEMENT_ID,
-                type: 'spline'
+                type: 'spline',
+                zoomType: 'x'
             },
             colors: me.LINE_COLORS,
             title: {
