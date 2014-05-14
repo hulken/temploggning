@@ -503,7 +503,7 @@ TempChart.Charter.prototype = {
 			'</form>';
 		this.$controlsElement.html(str);
 		$('.datetimepicker').datetimepicker({
-	      language: 'pt-BR',
+	      language: 'sv-SE',
 	      pickSeconds: false,
 	      pick12HourFormat: false
 	    });
