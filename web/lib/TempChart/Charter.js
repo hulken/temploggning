@@ -195,7 +195,7 @@ TempChart.Charter.prototype = {
 	 */
 	visualizeSingleValuesView: function(series) {
 		var me = this;
-		me._sortSeries(series);
+		me._sortSeries(series, 'name');
 		me.$controlsElement.html('');
 		
 		var spacerAdded = false;
