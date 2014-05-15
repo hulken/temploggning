@@ -313,7 +313,8 @@ TempChart.Charter.prototype = {
                     from: -40,
                     to: 0,
                     color: 'rgba(68, 170, 213, 0.05)',
-                }]
+                }],
+                showEmpty: false
             }, { // Secondary yAxis
                 gridLineWidth: 0,
                 title: {
@@ -334,7 +335,8 @@ TempChart.Charter.prototype = {
 						color: '#000000'
                     }
                 },
-                opposite: true
+                opposite: true,
+                showEmpty: false
 			}, { // Third yAxis
                 gridLineWidth: 0,
                 title: {
@@ -355,7 +357,8 @@ TempChart.Charter.prototype = {
 						color: '#000000'
                     }
                 },
-                opposite: true
+                opposite: true,
+                showEmpty: false
 			}],
             tooltip: {
                 formatter: function() {
