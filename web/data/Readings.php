@@ -12,7 +12,10 @@ class Readings
 
 		$groupby = "";
 		$from = 0;
-		
+
+		$tzOffsetInSeconds = ((new DateTime("NOW", new DateTimeZone(Settings::TIME_ZONE)))->getOffset()); //Seconds offset to UTC
+		$tzOffsetDBString = sprintf( "%s%02d:%02d", ( $tzOffsetInSeconds >= 0 ) ? '+' : '-', abs( $tzOffsetInSeconds / 3600 ), abs( $tzOffsetInSeconds % 3600 ) ); //Offset to DBstring eg +02:00
+
 		if(isset($_GET['from']) && isset($_GET['to'])) {
 			$from = $_GET['from'];
 			$period = (($_GET['to'] - $_GET['from']) * (1/60) * (1/60) * (1/24));
@@ -21,7 +24,7 @@ class Readings
 		if(isset($_GET['period'])) {
 			$period = $_GET['period'];
 			
-			if($period === 'latest'){
+			if($period === 'latest' || $period === 'statistics-minmax'){
 				$period = 10000;
 			}
 		} else if(!isset($period)){
@@ -76,35 +79,35 @@ class Readings
 	                        . " ) AS i ON i.date = r.date AND i.sensor_id = r.sensor_id"
 	                        . " RIGHT JOIN sensors s ON s.sensor_id = r.sensor_id"
 	                        . " WHERE s.hidden = false"
-	                        . " ORDER BY sensor_id, date ASC";
+	                        . " ORDER BY s.sensor_type, s.name, date ASC";
 			}
 			else if (isset($_GET['period']) && $_GET['period'] == 'statistics-avg-hour') { // List of statistics readings hourperday
-					$query = "SELECT EXTRACT(HOUR FROM CONVERT_TZ(r.date,'+00:00','+01:00'))+1 AS date, AVG(r.temp) AS temp, s.sensor_id, s.name, s.color, s.sensor_type FROM readings r"
+					$query = "SELECT EXTRACT(HOUR FROM CONVERT_TZ(r.date,'+00:00','$tzOffsetDBString'))+1 AS date, AVG(r.temp) AS temp, s.sensor_id, s.name, s.color, s.sensor_type FROM readings r"
 							. "	LEFT JOIN sensors s ON r.sensor_id = s.sensor_id"
 							. "	WHERE s.hidden = false"
 							. "	GROUP BY r.sensor_id, date"
-							. "	ORDER BY s.sensor_id, date ASC";
+							. "	ORDER BY s.sensor_type, s.name, date ASC";
 			}
 			else if (isset($_GET['period']) && $_GET['period'] == 'statistics-avg-weekday') { // List of statistics readings dayperweek
-					$query = "SELECT WEEKDAY(CONVERT_TZ(r.date,'+00:00','+01:00'))+1 AS date, AVG(r.temp) AS temp, s.sensor_id, s.name, s.color, s.sensor_type FROM readings r"
+					$query = "SELECT WEEKDAY(CONVERT_TZ(r.date,'+00:00','$tzOffsetDBString'))+1 AS date, AVG(r.temp) AS temp, s.sensor_id, s.name, s.color, s.sensor_type FROM readings r"
 							. "	LEFT JOIN sensors s ON r.sensor_id = s.sensor_id"
 							. "	WHERE s.hidden = false"
 							. "	GROUP BY r.sensor_id, date"
-							. "	ORDER BY s.sensor_id, date ASC";
+							. "	ORDER BY s.sensor_type, s.name, date ASC";
 			}
 			else if (isset($_GET['period']) && $_GET['period'] == 'statistics-avg-month') { // List of statistics readings dayyear
-					$query = "SELECT EXTRACT( MONTH FROM CONVERT_TZ(r.date,'+00:00','+01:00') ) AS date, AVG(r.temp) AS temp, s.sensor_id, s.name, s.color, s.sensor_type FROM readings r"
+					$query = "SELECT EXTRACT( MONTH FROM CONVERT_TZ(r.date,'+00:00','$tzOffsetDBString') ) AS date, AVG(r.temp) AS temp, s.sensor_id, s.name, s.color, s.sensor_type FROM readings r"
 							. "	LEFT JOIN sensors s ON r.sensor_id = s.sensor_id"
 							. "	WHERE s.hidden = false"
 							. "	GROUP BY r.sensor_id, date"
-							. "	ORDER BY r.sensor_id, date ASC";
+							. "	ORDER BY s.sensor_type, s.name, date ASC";
 			}
 			else { // List of readings
 					$query = "SELECT UNIX_TIMESTAMP(r.date) AS date, AVG(r.temp) AS temp, s.sensor_id, s.name, s.color, s.sensor_type FROM readings r"
 							. "	LEFT JOIN sensors s ON r.sensor_id = s.sensor_id"
 							. "	WHERE $where AND s.hidden = false"
 							. "	GROUP BY $groupby"
-							. "	ORDER BY s.sensor_id, r.date ASC";
+							. "	ORDER BY s.sensor_type, s.name, r.date ASC";
 			}
 
 			if (isset($_GET['debug'])) {
@@ -120,12 +123,29 @@ class Readings
 	        $lastSensorType;
 	        $containData = false;
 	        
+	    if(isset($_GET['period']) && ($_GET['period'] == 'statistics-minmax'))
+	    {
+	    // TODO
+			while($row = mysql_fetch_array($result)) 
+			{
+	                 array_push($collection, array($row['sensor_id'], $row['maxval'], $row['minval']));
+	            
+	            $lastName = $row['maxval'];
+	            $lastColor = $row['minval'];
+	            $lastSensorType = $row['sensor_id'];
+			}
+			if(isset($lastId) && isset($lastName) && isset($lastColor)) {
+	        	//array_push($collection, array($lastId, $lastName, $lastColor, $lastSensorType, $arr));
+	        }
+	    }
+	    else
+	    {  
 			while($row = mysql_fetch_array($result)) 
 			{
 	            if (intval($row['sensor_id']) != $lastId) {                
 	                if (isset($arr)) {
 	                    if ($lastId >= 0 && $containData) {
-	                        array_push($collection, array($lastId, $lastName, $lastColor, $lastSensorType, $arr));
+	                        array_push($collection, array($lastId, utf8_encode($lastName), utf8_encode($lastColor), $lastSensorType, $arr));
 	                    }
 	                    
 	                    unset($arr);
@@ -135,6 +155,7 @@ class Readings
 	                
 	                $lastId = intval($row['sensor_id']);
 	            }
+
 	            // We don't want to add seconds for statistics
 	            if (isset($_GET['period']) && ($_GET['period'] == 'statistics-avg-hour' || $_GET['period'] == 'statistics-avg-weekday' || $_GET['period'] == 'statistics-avg-month' ) && intval($row['date']) > 0)
 	            {
@@ -151,8 +172,10 @@ class Readings
 	            $lastColor = $row['color'];
 	            $lastSensorType = $row['sensor_type'];
 			}
-			if(isset($lastId) && isset($lastName) && isset($lastColor)) {
-	        	array_push($collection, array($lastId, $lastName, $lastColor, $lastSensorType, $arr));
+
+			if ($lastId >= 0 && $containData) {
+	        	array_push($collection, array($lastId, utf8_encode($lastName), utf8_encode($lastColor), $lastSensorType, $arr));
+	        }
 	        }
 	        
 			$outStr = json_encode($collection);

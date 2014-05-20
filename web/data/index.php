@@ -2,6 +2,7 @@
 include_once 'Slim/Slim.php';
 include_once 'settings.php';
 include_once 'Readings.php';
+include_once 'CustomReadings.php';
 include_once 'Sensors.php';
 include_once 'WeatherForecast.php';
 
@@ -15,6 +16,14 @@ $api = new \Slim\Slim();
 $api->get('/readings', function () {
     $readings = new Readings();
     echo($readings->read());
+});
+// -------------------
+
+// CustomReadings
+// -------------------
+$api->get('/customreadings', function () {
+    $customreadings = new CustomReadings();
+    echo($customreadings->read());
 });
 // -------------------
 

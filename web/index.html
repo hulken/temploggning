@@ -68,9 +68,11 @@
           <li class="dropdown">
             <a href="#" class="dropdown-toggle" data-toggle="dropdown">Statistik <b class="caret"></b></a>
               <ul class="dropdown-menu">
-                <li><a href="#statistics-avg-hour">Snitt per timme på dygnet</a></li>
+                <li><a href="#statistics-minmax">Max/Min</a></li>
+                <li class="divider"></li>
+                <li><a href="#statistics-avg-hour">Snitt per timme p&aring; dygnet</a></li>
                 <li><a href="#statistics-avg-weekday">Snitt per veckodag</a></li>
-                <li><a href="#statistics-avg-month">Snitt per månad</a></li>
+                <li><a href="#statistics-avg-month">Snitt per m&aring;nad</a></li>
               </ul>
             </li>
             <li>
@@ -136,7 +138,6 @@
 
           // Init new TempChart
           tempChart = new TempChart(CLIENT_CONFIG);
-
           tempChart.initCharter();
 
       });
