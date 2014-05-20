@@ -16,8 +16,8 @@ class WeatherForecast {
     *   @return     json-data               JSON array contaning YR and SMHI data       
     */
     public function all($lat, $lng, $place, $time_limit=NULL) {
-        $data_array = $this->smhi($lat, $lng, NULL, false);
-        array_push($data_array,$this->yr($place, NULL, false));
+        $data_array = $this->smhi($lat, $lng, $time_limit, false);
+        array_push($data_array,$this->yr($place, $time_limit, false));
         return json_encode($data_array);   
     }
 
@@ -113,13 +113,19 @@ class WeatherForecast {
 
         for ($i=0; $i < count($time_series); $i++) { 
             if($source_conf['data_type'] == 'YR') {
-                array_push($converted_json,array(intval(strtotime($time_series[$i]['ATTRIBUTES']['FROM']))*1000, intval($time_series[$i]['TEMPERATURE'][0]['ATTRIBUTES']['VALUE'])));
+                $time = intval(strtotime($time_series[$i]['ATTRIBUTES']['FROM']))*1000;
+                $value = intval($time_series[$i]['TEMPERATURE'][0]['ATTRIBUTES']['VALUE']);
+                
             } elseif ($source_conf['data_type'] == 'SMHI') {
                 $value = $time_series[$i]->t;
                 if($source_conf['sensor_type'] == '1') {
                     $value = $time_series[$i]->r;
                 }
-                array_push($converted_json,array(intval(strtotime($time_series[$i]->validTime))*1000, $value));
+                $time = intval(strtotime($time_series[$i]->validTime))*1000;
+            }
+            # Both time and value set, and now or in future.
+            if(isset($time) && isset($value) && $time >= 1000*mktime(date('H'), 0, 0, date('n'), date('j'), date('Y'))) {
+                array_push($converted_json, array($time, $value));
             }
         }
 
