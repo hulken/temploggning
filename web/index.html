@@ -128,22 +128,14 @@
     <script src="lib/TempChart/DataHandler.js"></script>
     <script src="lib/TempChart/GoogleAnalytics.js"></script>
 
+    <script src="config.js"></script>
     <script>
       var tempChart = null;
 
       $(function() {
 
           // Init new TempChart
-          tempChart = new TempChart({
-            MAIN_ELEMENT_ID: 'graph',
-            CONTROLS_ELEMNT_ID: 'controls',
-            DATA_URL: [
-                        'data/readings'
-            ],
-            USE_CACHE: false,
-            DEBUG: true,
-            GA_TRACKING_CODE: null
-          });
+          tempChart = new TempChart(CLIENT_CONFIG);
 
           tempChart.initCharter();
 
