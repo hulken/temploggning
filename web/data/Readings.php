@@ -13,7 +13,8 @@ class Readings
 		$groupby = "";
 		$from = 0;
 
-		$tzOffsetInSeconds = ((new DateTime("NOW", new DateTimeZone(Settings::TIME_ZONE)))->getOffset()); //Seconds offset to UTC
+		$tzOffsetInSeconds = new DateTime("NOW", new DateTimeZone(Settings::TIME_ZONE)); //Seconds offset to UTC
+		$tzOffsetInSeconds = $tzOffsetInSeconds->getOffset();
 		$tzOffsetDBString = sprintf( "%s%02d:%02d", ( $tzOffsetInSeconds >= 0 ) ? '+' : '-', abs( $tzOffsetInSeconds / 3600 ), abs( $tzOffsetInSeconds % 3600 ) ); //Offset to DBstring eg +02:00
 
 		if(isset($_GET['from']) && isset($_GET['to'])) {
