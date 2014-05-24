@@ -35,7 +35,7 @@ class WeatherForecast {
             'url' => 'http://opendata-download-metfcst.smhi.se/api/category/pmp1.5g/version/1/geopoint/',
             'sensor_name' => 'SMHI',
             'sensor_id' => 998,
-            'sensor_type' => '0',
+            'sensor_type' => 'f0',
             'sensor_color' => '#000000'
         ); 
 
@@ -48,7 +48,7 @@ class WeatherForecast {
             $forecast_json = json_decode($forecast_json_str);
             $time_series = $forecast_json->timeseries;
             $converted_json_temp = $this->convertData($time_series, $source_conf, $time_limit);
-            $source_conf['sensor_type'] = '1';
+            $source_conf['sensor_type'] = 'f1';
             $converted_json_pressure = $this->convertData($time_series, $source_conf, $time_limit);
             
         } catch (Exception $e) {
@@ -84,7 +84,7 @@ class WeatherForecast {
             'url' => 'http://www.yr.no/stad/' . $place,
             'sensor_name' => 'YR',
             'sensor_id' => 999,
-            'sensor_type' => '0',
+            'sensor_type' => 'f0',
             'sensor_color' => '#336699'
         ); 
         $converted_json = array();
@@ -123,7 +123,7 @@ class WeatherForecast {
                 
             } elseif ($source_conf['data_type'] == 'SMHI') {
                 $value = $time_series[$i]->t;
-                if($source_conf['sensor_type'] == '1') {
+                if($source_conf['sensor_type'] == 'f1') {
                     $value = $time_series[$i]->r;
                 }
                 $time = intval(strtotime($time_series[$i]->validTime))*1000;

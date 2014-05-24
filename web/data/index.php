@@ -27,7 +27,6 @@ $api->get('/customreadings', function () {
 });
 // -------------------
 
-$app = \Slim\Slim::getInstance();
 // Sensors
 // -------------------
 $api->get('/sensors', function () {
@@ -49,15 +48,25 @@ $api->put('/sensor/:id', function ($id) use ($api) {
 // -------------------
 $api->get('/weatherforecast/:source', function ($source) {
     $weatherForecast = new WeatherForecast();
+    $time_limit=NULL;
+    if(isset($_GET['period'])) {
+        $period=$_GET['period'];
+        if ($period < 1 or $period > 7) {
+            echo('[]');
+            return;
+        } else {
+            $time_limit = ((time() + ($period*0.5)*24*60*60)*1000);
+        }
+    }
     switch ($source) {
         case 'all':
-            echo($weatherForecast->all($_GET['lat'],$_GET['lng'],$_GET['place']));
+            echo($weatherForecast->all($_GET['lat'],$_GET['lng'],$_GET['place'],$time_limit));
             break;
         case 'smhi':
-            echo($weatherForecast->smhi($_GET['lat'],$_GET['lng']));
+            echo($weatherForecast->smhi($_GET['lat'],$_GET['lng'],$time_limit));
             break;
         case 'yr':
-            echo($weatherForecast->yr($_GET['place']));
+            echo($weatherForecast->yr($_GET['place'],$time_limit));
             break;
     }
 });
