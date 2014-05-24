@@ -36,8 +36,7 @@ class WeatherForecast {
             'sensor_name' => 'SMHI',
             'sensor_id' => 998,
             'sensor_type' => '0',
-            'sensor_color' => '#000000',
-            'time_span' => 48 * 60 * 60 * 60
+            'sensor_color' => '#000000'
         ); 
 
         $converted_json = array();
@@ -48,9 +47,9 @@ class WeatherForecast {
             $forecast_json_str = file_get_contents($source_conf['url'] . 'lat/' . $lat .'/lon/' . $lng . '/data.json');
             $forecast_json = json_decode($forecast_json_str);
             $time_series = $forecast_json->timeseries;
-            $converted_json_temp = $this->convertData($time_series, $source_conf);
+            $converted_json_temp = $this->convertData($time_series, $source_conf, $time_limit);
             $source_conf['sensor_type'] = '1';
-            $converted_json_pressure = $this->convertData($time_series, $source_conf);
+            $converted_json_pressure = $this->convertData($time_series, $source_conf, $time_limit);
             
         } catch (Exception $e) {
             echo 'Could not get data from SMHI API: ',  $e->getMessage(), "\n";
@@ -72,15 +71,21 @@ class WeatherForecast {
     *   @return                 Array/JSON-string   Temploggning data array
     */
     public function yr($place, $time_limit=NULL, $as_json=true) {
-        $place = str_replace('_','/', (substr($place, 0, strpos($place, "?"))));
+
+        // Special parsing of place param to strip strange input
+        $place = str_replace('_','/', $place);
+        $qsPart = strpos($place, "?");
+        if($qsPart) {
+            $place = substr($place, 0, strpos($place, "?"));
+        }
+
         $source_conf = array(
             'data_type' => 'YR',
             'url' => 'http://www.yr.no/stad/' . $place,
             'sensor_name' => 'YR',
             'sensor_id' => 999,
             'sensor_type' => '0',
-            'sensor_color' => '#336699',
-            'time_span' => 48 * 60 * 60 * 60
+            'sensor_color' => '#336699'
         ); 
         $converted_json = array();
         
@@ -89,7 +94,7 @@ class WeatherForecast {
 
             $yr_data = $yr_xmlparse->getXMLTree($source_conf['url'],False,10);
             $time_series = $yr_data['TABULAR'][0]['TIME'];
-            $converted_json = $this->convertData($time_series, $source_conf);
+            $converted_json = $this->convertData($time_series, $source_conf, $time_limit);
 
         } catch (Exception $e) {
             echo 'Could not get data from YR API: ' , $source_conf['url'] , "\n",  $e->getMessage(), "\n";
@@ -108,7 +113,7 @@ class WeatherForecast {
     *   @param      source_conf     Array       Source cofiguration, to help handle conversion
     *   @return                     Array       Temploggning data array
     */
-    private function convertData($time_series, $source_conf) {
+    private function convertData($time_series, $source_conf, $time_limit=NULL) {
         $converted_json = array();
 
         for ($i=0; $i < count($time_series); $i++) { 
@@ -125,6 +130,9 @@ class WeatherForecast {
             }
             # Both time and value set, and now or in future.
             if(isset($time) && isset($value) && $time >= 1000*mktime(date('H'), 0, 0, date('n'), date('j'), date('Y'))) {
+                if(isset($time_limit) && $time > $time_limit) {
+                    continue;
+                }
                 array_push($converted_json, array($time, $value));
             }
         }
