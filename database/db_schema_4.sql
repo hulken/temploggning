@@ -45,6 +45,6 @@ CREATE TABLE IF NOT EXISTS `sensors` (
   PRIMARY KEY (`sensor_id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 
-CREATE UNIQUE INDEX `ix_id` (  `id` ,  `sensor_type` )
+CREATE UNIQUE INDEX `ix_id` ON `sensors` (  `id` ,  `sensor_type` );
 
 -- --------------------------------------------------------
