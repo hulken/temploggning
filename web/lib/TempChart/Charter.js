@@ -114,11 +114,22 @@ TempChart.Charter.prototype = {
 				me.visualizeMinMaxView(series);
 			} else if (period === 'statistics-avg-hour' || period === 'statistics-avg-weekday' || period === 'statistics-avg-month' ){
 				//Set xAxis labels
-				if (period === 'statistics-avg-hour') { me.xAxisCATEGORIES = me.HOURS; }
-				if (period === 'statistics-avg-weekday') { me.xAxisCATEGORIES = me.WEEKDAYS; }
-				if (period === 'statistics-avg-month') { me.xAxisCATEGORIES = me.MONTHS; }
-
-				me._createStatisticsView(series);		
+				if (period === 'statistics-avg-hour') { 
+					me.xAxisCATEGORIES = me.HOURS;
+					me._createStatisticsView(series, 1);
+				}
+				else if (period === 'statistics-avg-weekday') { 
+					me.xAxisCATEGORIES = me.WEEKDAYS;
+					me._createStatisticsView(series, 1);
+				}
+				else if (period === 'statistics-avg-month') { 
+					me.xAxisCATEGORIES = me.MONTHS; 
+					me._createStatisticsView(series, 2);
+				}
+				else {
+					me._createStatisticsView(series, 2);	
+				}
+				
 				// Hide not choosen series from cookie
 		      	$.each(me.chart.series, function(i, serie) {
 		        	var cookieValue = me.getCookie(serie.name);
@@ -540,7 +551,7 @@ TempChart.Charter.prototype = {
 		/* _createStatisticsView
 	 * 
 	 */
-	_createStatisticsView: function(series) {   
+	_createStatisticsView: function(series, gapSize) {   
 		var me = this;
         this.chart = new Highcharts.Chart({
         	credits: { enabled: false },
@@ -667,6 +678,8 @@ TempChart.Charter.prototype = {
                       }
                     },
                     lineWidth: 2,
+                    connectNulls: false,
+                    gapSize: gapSize,
                     states: {
                         hover: {
                             lineWidth: 5
