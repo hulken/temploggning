@@ -142,7 +142,7 @@ TempChart.Charter.prototype = {
 					me.createChartView(series, 20); 
 				}
 				else if (period === me.INTERVALS['month']) {
-					me.createChartView(series, 10);
+					me.createChartView(series, 11);
 				}
 				else if (period === me.INTERVALS['week']) {
 					me.createChartView(series, 5);
