@@ -49,7 +49,7 @@ class Readings
 		}
 		
 		if(isset($_GET['from']) && isset($_GET['to'])) {
-			$where = "FROM_UNIXTIME(" . $_GET['from'] . ") <= date && FROM_UNIXTIME(" . $_GET['to'] . ") > r.date ";
+			$where = "r.date BETWEEN FROM_UNIXTIME(" . $_GET['from'] . ") AND FROM_UNIXTIME(" . $_GET['to'] . ")";
 		} else {
 			$where = "DATE_SUB(NOW(),INTERVAL " . $period ." DAY) <= r.date ";
 		}
