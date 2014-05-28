@@ -113,13 +113,13 @@ TempChart.Charter.prototype = {
 			} else if(period === 'statistics-minmax') {
 				me.visualizeMinMaxView(series);
 			} else if (period === 'statistics-avg-hour' || period === 'statistics-avg-weekday' || period === 'statistics-avg-month' ){
-        //Set xAxis labels
-        if (period === 'statistics-avg-hour') { me.xAxisCATEGORIES = me.HOURS; }
-        if (period === 'statistics-avg-weekday') { me.xAxisCATEGORIES = me.WEEKDAYS; }
-        if (period === 'statistics-avg-month') { me.xAxisCATEGORIES = me.MONTHS; }
-        
-					me._createStatisticsView(series);		
-					// Hide not choosen series from cookie
+				//Set xAxis labels
+				if (period === 'statistics-avg-hour') { me.xAxisCATEGORIES = me.HOURS; }
+				if (period === 'statistics-avg-weekday') { me.xAxisCATEGORIES = me.WEEKDAYS; }
+				if (period === 'statistics-avg-month') { me.xAxisCATEGORIES = me.MONTHS; }
+
+				me._createStatisticsView(series);		
+				// Hide not choosen series from cookie
 		      	$.each(me.chart.series, function(i, serie) {
 		        	var cookieValue = me.getCookie(serie.name);
 		          	if (cookieValue == 'false') {
@@ -197,7 +197,7 @@ TempChart.Charter.prototype = {
 		 else if(period === 'custom') {
 			this._createCustomView();
 		} else if (period === 'statistics-avg-hour' || period === 'statistics-avg-weekday' || period === 'statistics-avg-month'  ) {
-      this.startAutoRefresh();
+      		this.startAutoRefresh();
 			this._createStatisticsView();
 			this.$controlsElement.html('');
 			console.log('EVENT FIRE LOAD_READINGS ::', period);
@@ -207,6 +207,8 @@ TempChart.Charter.prototype = {
 			this.$controlsElement.html('');
 			console.log('EVENT FIRE LOAD_READINGS ::', period);
 			$(document).trigger('TempChart_load_readings', [period]);
+
+
 		}
 	},
 
