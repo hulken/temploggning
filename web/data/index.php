@@ -4,6 +4,7 @@ include_once 'settings.php';
 include_once 'Readings.php';
 include_once 'CustomReadings.php';
 include_once 'Sensors.php';
+include_once 'WeatherForecast.php';
 
 // Initiate Slim framework
 \Slim\Slim::registerAutoloader();
@@ -26,7 +27,6 @@ $api->get('/customreadings', function () {
 });
 // -------------------
 
-$app = \Slim\Slim::getInstance();
 // Sensors
 // -------------------
 $api->get('/sensors', function () {
@@ -40,6 +40,34 @@ $api->put('/sensor/:id', function ($id) use ($api) {
 	$json = json_decode($request->getBody());
 	if(isset($json->name)) {
     	echo($sensors->update($id, $json->name, $json->id, $json->color));
+    }
+});
+// -------------------
+
+// WeatherForecast
+// -------------------
+$api->get('/weatherforecast/:source', function ($source) {
+    $weatherForecast = new WeatherForecast();
+    $time_limit=NULL;
+    if(isset($_GET['period'])) {
+        $period=$_GET['period'];
+        if ($period < 1 or $period > 7) {
+            echo('[]');
+            return;
+        } else {
+            $time_limit = ((time() + ($period*0.5)*24*60*60)*1000);
+        }
+    }
+    switch ($source) {
+        case 'all':
+            echo($weatherForecast->all($_GET['lat'],$_GET['lng'],$_GET['place'],$time_limit));
+            break;
+        case 'smhi':
+            echo($weatherForecast->smhi($_GET['lat'],$_GET['lng'],$time_limit));
+            break;
+        case 'yr':
+            echo($weatherForecast->yr($_GET['place'],$time_limit));
+            break;
     }
 });
 // -------------------

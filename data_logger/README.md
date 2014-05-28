@@ -1,6 +1,32 @@
 ##Temperature logging
 Logger for sensor data from 1-wire and tellstick to mysql 
 
+###Tellstic Duo
+Add the following lines to your /etc/apt/sources.list:
+
+```deb http://download.telldus.com/debian/ stable main```
+
+Download and add Telldus public key for apt-secure
+
+```wget http://download.telldus.se/debian/telldus-public.key -O- | sudo apt-key add -```
+
+Update the repository
+```sudo apt-get update```
+
+To install telldus-core, do
+```sudo apt-get install telldus-core```
+
+Download Switch King Server
+```wget http://www.switchking.se/sv/downloads?download=91%3Aserver-setup-linux-v3.2.1 -O SwitchKing.Server.Linux.3.2.1.0.zip```
+
+Unpack
+```unzip SwitchKing.Server.Linux.3.2.1.0.zip -d ./switchking_server```
+
+Install mono
+```sudo apt-get install monodevelop```
+
+
+
 ###Common setup
 ##### Python
 Make sure to have python 2.7 installed

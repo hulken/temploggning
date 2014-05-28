@@ -173,22 +173,23 @@ TempChart.DataHandler.prototype = {
                     seriesData = data[4];
                 }
                 
-                if (data[3] == 0) { // temp
+                if (data[3] == 0 || data[3] == 'f0') { // temp (and forecast temp)
 					me.series.push({
 	                	name: data[1],
 	                	color: data[2],
+	                	dashStyle: (data[3] == 'f0') ? 'shortdash' : 'solid',
 	                	tooltip: {
 		                    valueSuffix: ' \u00B0C'
 		                },
 	                	data: seriesData
 					});
 				}
-				else if (data[3] == 1) { // humidity
+				else if (data[3] == 1  || data[3] == 'f1') { // humidity (and forecast humidity)
 					me.series.push({
 	                	name: data[1],
 	                	color: data[2],
 	                	yAxis: 1,
-	                	dashStyle: 'shortdot',
+	                	dashStyle: (data[3] == 'f1') ? 'shortdashdotdot' : 'shortdot',
 	                	tooltip: {
 		                    valueSuffix: ' %'
 		                },
