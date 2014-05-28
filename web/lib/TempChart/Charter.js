@@ -78,9 +78,15 @@ TempChart.Charter.prototype = {
 		}
 	},
 	HOURS: ['NULL','00:00','01:00', '02:00', '03:00', '04:00', '05:00', '06:00', '07:00', '08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00', '19:00', '20:00', '21:00', '22:00', '23:00', '00:00'],
-  WEEKDAYS: ['NULL','Man', 'Tis', 'Ons', 'Tor', 'Fre', 'Lor', 'Son'],
+	WEEKDAYS: ['NULL','Man', 'Tis', 'Ons', 'Tor', 'Fre', 'Lor', 'Son'],
 	MONTHS: ['NULL', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-  xAxisCATEGORIES: [],
+	xAxisCATEGORIES: [],
+	INTERVALS: {
+		day: 1,
+		week: 7,
+		month: 30,
+		year: 100000
+	},
 	// Varibles
 	// ---------------
 	$mainElement: null,
@@ -121,7 +127,21 @@ TempChart.Charter.prototype = {
 		          	}
 		      	});	
 			} else {
-				me.createChartView(series); 
+				if (period === me.INTERVALS['year']) {
+					me.createChartView(series, 20); 
+				}
+				else if (period === me.INTERVALS['month']) {
+					me.createChartView(series, 10);
+				}
+				else if (period === me.INTERVALS['week']) {
+					me.createChartView(series, 5);
+				}
+				else if (period === me.INTERVALS['day']) {
+					me.createChartView(series, 2);
+				}
+				else { // Custom?
+					me.createChartView(series, 2); 
+				}
 
 				// Hide not choosen series from cookie
 		      	$.each(me.chart.series, function(i, serie) {
@@ -252,12 +272,13 @@ TempChart.Charter.prototype = {
 	 * @param 	series 		array 		highcharts data series array
 	 *
 	 */
-	createChartView: function(series) {
+	createChartView: function(series, gapSize) {
 		var me = this;
         this.chart = new Highcharts.Chart({
         	credits: { enabled: false },
             chart: {
                 renderTo: this.MAIN_ELEMENT_ID,
+                defaultSeriesType: 'spline',
                 type: 'spline',
                 zoomType: 'x'
             },
@@ -383,6 +404,8 @@ TempChart.Charter.prototype = {
                       }
                     },
                     lineWidth: 2,
+                    connectNulls: false,
+                    gapSize: gapSize, /* Day: 2, Week: 5, Month: 10, Year = 20 */ 
                     states: {
                         hover: {
                             lineWidth: 5
@@ -756,16 +779,16 @@ TempChart.Charter.prototype = {
 				return hash.replace('#','');
 				break;
 			case '#day': 
-				return 1;
+				return this.INTERVALS['day'];
 				break;
 			case '#week': 
-				return 7;
+				return this.INTERVALS['week'];
 				break;
 			case '#month': 
-				return 30;
+				return this.INTERVALS['month'];
 				break;
 			case '#year': 
-				return 100000;
+				return this.INTERVALS['year'];
 				break;	
 			default:
 				return 'latest'; // Start view
