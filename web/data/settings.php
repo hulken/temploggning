@@ -14,9 +14,8 @@ $connection = mysql_connect($sql_server, $sql_user, $sql_passw) or die (mysql_er
 class Settings
 {
 	// Database schema version
-	const DB_SCHEMA_VERSION = 3;
+	const DB_SCHEMA_VERSION = 4;
     const CACHE_DIR = 'cacheData/'; // Note: This must end with a forward-slash in unix and backward slash in windows
-    const TIME_ZONE = "Europe/Stockholm";
 }
 
 function sqlerr($file = '', $line = '')
