@@ -1,13 +1,13 @@
-<?php ## Fil med mycket viktiga inställningar som krävs för att kunna kommunicera med databasen
+<?php ## Settings for database connection
 
-// Viktiga inställningar
+// Basic settings
 $sql_engine	= "MySQL";
 $sql_server = "localhost";
 $sql_user	= "temploggning";
 $sql_passw	= "temploggning";
 $sql_database = "temploggning";
 
-// Koppla upp anslutningen
+// Setup connection
 $connection = mysql_connect($sql_server, $sql_user, $sql_passw) or die (mysql_error());
 @mysql_select_db("$sql_database") or die( "Unable to select database");
 
@@ -16,6 +16,8 @@ class Settings
 	// Database schema version
 	const DB_SCHEMA_VERSION = 4;
     const CACHE_DIR = 'cacheData/'; // Note: This must end with a forward-slash in unix and backward slash in windows
+	const DATABASE_TIME_ZONE = "+00:00" // Change to eg "UTC" (will only work if MySQL time zone support are installed http://dev.mysql.com/doc/refman/5.5/en/time-zone-support.html)
+    const WEB_TIME_ZONE = "+00:00" // Change to eg "Europe/Stockholm" (will only work if MySQL time zone support are installed http://dev.mysql.com/doc/refman/5.5/en/time-zone-support.html)
 }
 
 function sqlerr($file = '', $line = '')
