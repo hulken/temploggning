@@ -16,8 +16,8 @@ class Settings
 	// Database schema version
 	const DB_SCHEMA_VERSION = 4;
     const CACHE_DIR = 'cacheData/'; // Note: This must end with a forward-slash in unix and backward slash in windows
-	const DATABASE_TIME_ZONE = "+00:00" // Change to eg "UTC" (will only work if MySQL time zone support are installed http://dev.mysql.com/doc/refman/5.5/en/time-zone-support.html)
-    const WEB_TIME_ZONE = "+00:00" // Change to eg "Europe/Stockholm" (will only work if MySQL time zone support are installed http://dev.mysql.com/doc/refman/5.5/en/time-zone-support.html)
+	const DATABASE_TIME_ZONE = "+00:00"; // Change to eg "UTC" (will only work if MySQL time zone support are installed http://dev.mysql.com/doc/refman/5.5/en/time-zone-support.html)
+    const WEB_TIME_ZONE = "+00:00"; // Change to eg "Europe/Stockholm" (will only work if MySQL time zone support are installed http://dev.mysql.com/doc/refman/5.5/en/time-zone-support.html)
 }
 
 function sqlerr($file = '', $line = '')
