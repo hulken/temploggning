@@ -12,10 +12,9 @@ class Readings
 
 		$groupby = "";
 		$from = 0;
-
-		$tzOffsetInSeconds = new DateTime("NOW", new DateTimeZone(Settings::TIME_ZONE)); //Seconds offset to UTC
-		$tzOffsetInSeconds = $tzOffsetInSeconds->getOffset();
-		$tzOffsetDBString = sprintf( "%s%02d:%02d", ( $tzOffsetInSeconds >= 0 ) ? '+' : '-', abs( $tzOffsetInSeconds / 3600 ), abs( $tzOffsetInSeconds % 3600 ) ); //Offset to DBstring eg +02:00
+		
+		$dbTimeZone = Settings::DATABASE_TIME_ZONE;
+		$webTimeZone = Settings::WEB_TIME_ZONE;
 
 		if(isset($_GET['from']) && isset($_GET['to'])) {
 			$from = $_GET['from'];
@@ -83,21 +82,21 @@ class Readings
 	                        . " ORDER BY s.sensor_type, s.name, date ASC";
 			}
 			else if (isset($_GET['period']) && $_GET['period'] == 'statistics-avg-hour') { // List of statistics readings hourperday
-					$query = "SELECT EXTRACT(HOUR FROM CONVERT_TZ(r.date,'+00:00','$tzOffsetDBString'))+1 AS date, AVG(r.temp) AS temp, s.sensor_id, s.name, s.color, s.sensor_type FROM readings r"
+					$query = "SELECT EXTRACT(HOUR FROM CONVERT_TZ(r.date,'$dbTimeZone','$webTimeZone'))+1 AS date, AVG(r.temp) AS temp, s.sensor_id, s.name, s.color, s.sensor_type FROM readings r"
 							. "	LEFT JOIN sensors s ON r.sensor_id = s.sensor_id"
 							. "	WHERE s.hidden = false"
 							. "	GROUP BY r.sensor_id, date"
 							. "	ORDER BY s.sensor_type, s.name, date ASC";
 			}
 			else if (isset($_GET['period']) && $_GET['period'] == 'statistics-avg-weekday') { // List of statistics readings dayperweek
-					$query = "SELECT WEEKDAY(CONVERT_TZ(r.date,'+00:00','$tzOffsetDBString'))+1 AS date, AVG(r.temp) AS temp, s.sensor_id, s.name, s.color, s.sensor_type FROM readings r"
+					$query = "SELECT WEEKDAY(CONVERT_TZ(r.date,'$dbTimeZone','$webTimeZone'))+1 AS date, AVG(r.temp) AS temp, s.sensor_id, s.name, s.color, s.sensor_type FROM readings r"
 							. "	LEFT JOIN sensors s ON r.sensor_id = s.sensor_id"
 							. "	WHERE s.hidden = false"
 							. "	GROUP BY r.sensor_id, date"
 							. "	ORDER BY s.sensor_type, s.name, date ASC";
 			}
 			else if (isset($_GET['period']) && $_GET['period'] == 'statistics-avg-month') { // List of statistics readings dayyear
-					$query = "SELECT EXTRACT( MONTH FROM CONVERT_TZ(r.date,'+00:00','$tzOffsetDBString') ) AS date, AVG(r.temp) AS temp, s.sensor_id, s.name, s.color, s.sensor_type FROM readings r"
+					$query = "SELECT EXTRACT( MONTH FROM CONVERT_TZ(r.date,'$dbTimeZone','$webTimeZone') ) AS date, AVG(r.temp) AS temp, s.sensor_id, s.name, s.color, s.sensor_type FROM readings r"
 							. "	LEFT JOIN sensors s ON r.sensor_id = s.sensor_id"
 							. "	WHERE s.hidden = false"
 							. "	GROUP BY r.sensor_id, date"

@@ -177,7 +177,7 @@ TempChart.DataHandler.prototype = {
 					me.series.push({
 	                	name: data[1],
 	                	color: data[2],
-	                	dashStyle: (data[3] == 'f0') ? 'shortdash' : 'solid',
+	                	dashStyle: (data[3] == 'f0') ? 'solid' : 'solid',
 	                	tooltip: {
 		                    valueSuffix: ' \u00B0C'
 		                },
@@ -189,7 +189,7 @@ TempChart.DataHandler.prototype = {
 	                	name: data[1],
 	                	color: data[2],
 	                	yAxis: 1,
-	                	dashStyle: (data[3] == 'f1') ? 'shortdashdotdot' : 'shortdot',
+	                	dashStyle: (data[3] == 'f1') ? 'shortdot' : 'shortdot',
 	                	tooltip: {
 		                    valueSuffix: ' %'
 		                },

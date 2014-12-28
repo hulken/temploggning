@@ -33,7 +33,7 @@ class WeatherForecast {
         $source_conf = array(
             'data_type' => 'SMHI',
             'url' => 'http://opendata-download-metfcst.smhi.se/api/category/pmp1.5g/version/1/geopoint/',
-            'sensor_name' => 'SMHI',
+            'sensor_name' => 'SMHI Forecast',
             'sensor_id' => 998,
             'sensor_type' => 'f0',
             'sensor_color' => '#000000'
@@ -82,7 +82,7 @@ class WeatherForecast {
         $source_conf = array(
             'data_type' => 'YR',
             'url' => 'http://www.yr.no/stad/' . $place,
-            'sensor_name' => 'YR',
+            'sensor_name' => 'YR Forecast',
             'sensor_id' => 999,
             'sensor_type' => 'f0',
             'sensor_color' => '#336699'
