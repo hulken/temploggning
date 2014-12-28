@@ -59,7 +59,7 @@
       <div class="modal-dialog">
         <div class="modal-content">
           <div class="modal-body text-center">
-            <img src="resources/loader.gif"/>
+            <img src="../resources/loader.gif"/>
             <p></p>
             <p>Laddar...</p>
           </div>
