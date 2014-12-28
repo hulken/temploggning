@@ -42,6 +42,21 @@ $api->put('/sensor/:id', function ($id) use ($api) {
     	echo($sensors->update($id, $json->name, $json->id, $json->color));
     }
 });
+
+// Log API
+// -------------------
+$api->put('/log/:id', function ($sensor_id) use ($api) {
+    $sensors = new Sensors();
+    $request = $api->request();
+    $json = json_decode($request->getBody());
+
+    if (isset($json->value)) {
+        echo($sensors->log($sensor_id, $json->value));
+    }
+    else  {
+        echo 'Invalid input (Please provide proper JSON data: value must be set)';
+    }
+});
 // -------------------
 
 // WeatherForecast
