@@ -80,7 +80,7 @@ class Readings
 		if(!isset($outStr) || !$outStr) 
 		{
 			if(isset($_GET['period']) && $_GET['period'] == 'latest') { // Latest readings
-	            $query = "SELECT UNIX_TIMESTAMP(i.date) AS date, i.sensor_id, ROUND(r.temp, 1), s.name, s.color, s.sensor_type FROM readings r"
+	            $query = "SELECT UNIX_TIMESTAMP(i.date) AS date, i.sensor_id, ROUND(r.temp, 1) AS temp, s.name, s.color, s.sensor_type FROM readings r"
 	                        . " RIGHT JOIN ("
 	                        . " SELECT MAX(date) AS date, sensor_id FROM readings GROUP BY sensor_id"
 	                        . " ) AS i ON i.date = r.date AND i.sensor_id = r.sensor_id"
