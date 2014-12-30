@@ -486,7 +486,7 @@ TempChart.Charter.prototype = {
 					'<label class="col-sm-2 control-label" for="fromdatetime">' + this.strings.from + '</label>' +
 					'<div class="controls col-sm-10">' +
 			 			'<div class="input-group date datetimepicker">' +
-				   			'<input class="form-control" id="fromdatetime" data-format="yyyy-MM-dd hh:mm" type="text" value="' + Highcharts.dateFormat('%Y-%m-%d %H:%M', d.setDate(d.getDate() - 1)) + '"></input>' +
+				   			'<input class="form-control" id="fromdatetime" data-format="yyyy-MM-dd" type="text" value="' + Highcharts.dateFormat('%Y-%m-%d %H:%M', d.setDate(d.getDate() - 1)) + '"></input>' +
 				    		'<span class="input-group-addon"><span class="glyphicon glyphicon-calendar"></span>' +
 			      		'</div>' +
 		  			'</div>' +
@@ -495,7 +495,7 @@ TempChart.Charter.prototype = {
 		  			'<label class="col-sm-2 control-label" for="todatetime">' + this.strings.to + '</label>' +
 		  			'<div class="controls col-sm-10">' +
 			  			'<div class="input-group date datetimepicker">' +
-				   			'<input class="form-control" id="todatetime" data-format="yyyy-MM-dd hh:mm" type="text" value="' + Highcharts.dateFormat('%Y-%m-%d %H:%M', new Date()) + '"></input>' +
+				   			'<input class="form-control" id="todatetime" data-format="yyyy-MM-dd" type="text" value="' + Highcharts.dateFormat('%Y-%m-%d %H:%M', new Date()) + '"></input>' +
 				    		'<span class="input-group-addon"><span class="glyphicon glyphicon-calendar"></span>' +
 			      		'</div>' +
 		  			'</div>' +
