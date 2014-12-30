@@ -139,16 +139,16 @@ TempChart.Charter.prototype = {
 		      	});	
 			} else {
 				if (period === me.INTERVALS['year']) {
-					me.createChartView(series, 20); 
+					me.createChartView(series, 30); // 365 data points
 				}
 				else if (period === me.INTERVALS['month']) {
-					me.createChartView(series, 11);
+					me.createChartView(series, 20); // 30 data points
 				}
 				else if (period === me.INTERVALS['week']) {
-					me.createChartView(series, 5);
+					me.createChartView(series, 42); // 168 data points (7 enough, but using instead to display forecast properly)
 				}
 				else if (period === me.INTERVALS['day']) {
-					me.createChartView(series, 2);
+					me.createChartView(series, 7); // 144 data points (3 enough, but using instead to display forecast properly)
 				}
 				else { // Custom?
 					me.createChartView(series, 2); 
@@ -169,7 +169,7 @@ TempChart.Charter.prototype = {
 		};
 
 		$(document).on('submit','#customView',function(e) {
-			var period = null;
+			var period = me.INTERVALS.day;
 			var from = (new Date($('#fromdatetime').val() + ':00')).getTime()/1000;
 			var to = (new Date($('#todatetime').val() + ':00')).getTime()/1000;
 			console.log('EVENT FIRE LOAD_READINGS ::', period, from, to);
@@ -424,7 +424,8 @@ TempChart.Charter.prototype = {
                         }
                     },
                     marker: {
-                        enabled: false,
+                        enabled: true,
+                        radius: 1,
                         states: {
                             hover: {
                                 enabled: true,
