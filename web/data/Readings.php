@@ -1,4 +1,5 @@
 <?php
+use Respect\Validation\Validator as v;
 
 class Readings
 {
@@ -8,6 +9,7 @@ class Readings
 	}
 
 	public function read() {
+		header('Content-type: application/json');
 		$arr = Array();
 
 		$groupby = "";
@@ -19,6 +21,11 @@ class Readings
 		if(isset($_GET['from']) && isset($_GET['to'])) {
 			$from = $_GET['from'];
 			$period = (($_GET['to'] - $_GET['from']) * (1/60) * (1/60) * (1/24));
+
+			if (!v::numeric()->positive()->validate($period)) {
+				http_response_code(500);
+				die('{ "error": "Invalid interval selected" }');
+			}
 		}
 		
 		if(isset($_GET['period'])) {
