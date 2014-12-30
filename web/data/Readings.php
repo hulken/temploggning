@@ -129,64 +129,64 @@ class Readings
 	        $lastColor;
 	        $lastSensorType;
 	        $containData = false;
-	        
-	    if(isset($_GET['period']) && ($_GET['period'] == 'statistics-minmax'))
-	    {
-	    // TODO
-			while($row = mysql_fetch_array($result)) 
-			{
+		        
+		    if(isset($_GET['period']) && ($_GET['period'] == 'statistics-minmax'))
+		    {
+		    // TODO
+				while($row = mysql_fetch_array($result)) 
+				{
 	                 array_push($collection, array($row['sensor_id'], $row['maxval'], $row['minval']));
-	            
-	            $lastName = $row['maxval'];
-	            $lastColor = $row['minval'];
-	            $lastSensorType = $row['sensor_id'];
-			}
-			if(isset($lastId) && isset($lastName) && isset($lastColor)) {
-	        	//array_push($collection, array($lastId, $lastName, $lastColor, $lastSensorType, $arr));
-	        }
-	    }
-	    else
-	    {  
-			while($row = mysql_fetch_array($result)) 
-			{
-	            if (intval($row['sensor_id']) != $lastId) {                
-	                if (isset($arr)) {
-	                    if ($lastId >= 0 && $containData) {
-	                        array_push($collection, array($lastId, utf8_encode($lastName), utf8_encode($lastColor), $lastSensorType, $arr));
-	                    }
-	                    
-	                    unset($arr);
-	                    $arr = array();
-	                    $containData = false;
-	                }
-	                
-	                $lastId = intval($row['sensor_id']);
-	            }
+		            
+		            $lastName = $row['maxval'];
+		            $lastColor = $row['minval'];
+		            $lastSensorType = $row['sensor_id'];
+				}
+				if(isset($lastId) && isset($lastName) && isset($lastColor)) {
+		        	//array_push($collection, array($lastId, $lastName, $lastColor, $lastSensorType, $arr));
+		        }
+		    }
+		    else
+		    {  
+				while($row = mysql_fetch_array($result)) 
+				{
+		            if (intval($row['sensor_id']) != $lastId) {                
+		                if (isset($arr)) {
+		                    if ($lastId >= 0 && $containData) {
+		                        array_push($collection, array($lastId, utf8_encode($lastName), utf8_encode($lastColor), $lastSensorType, $arr));
+		                    }
+		                    
+		                    unset($arr);
+		                    $arr = array();
+		                    $containData = false;
+		                }
+		                
+		                $lastId = intval($row['sensor_id']);
+		            }
 
-	            // We don't want to add seconds for statistics
-	            if (isset($_GET['period']) && ($_GET['period'] == 'statistics-avg-hour' || $_GET['period'] == 'statistics-avg-weekday' || $_GET['period'] == 'statistics-avg-month' ) && intval($row['date']) > 0)
-	            {
-                	$containData = true;
-	                array_push($arr, array((intval($row['date'])), floatval($row['temp'])));
-	            }
-	            // Add seconds
-	            else if (intval($row['date']) > 0) {
-	                $containData = true;
-	                array_push($arr, array((intval($row['date']) * 1000), floatval($row['temp'])));
-	            }
-	            
-	            $lastName = $row['name'];
-	            $lastColor = $row['color'];
-	            $lastSensorType = $row['sensor_type'];
-			}
+		            // We don't want to add seconds for statistics
+		            if (isset($_GET['period']) && ($_GET['period'] == 'statistics-avg-hour' || $_GET['period'] == 'statistics-avg-weekday' || $_GET['period'] == 'statistics-avg-month' ) && intval($row['date']) > 0)
+		            {
+	                	$containData = true;
+		                array_push($arr, array((intval($row['date'])), floatval($row['temp'])));
+		            }
+		            // Add seconds
+		            else if (intval($row['date']) > 0) {
+		                $containData = true;
+		                array_push($arr, array((intval($row['date']) * 1000), floatval($row['temp'])));
+		            }
+		            
+		            $lastName = $row['name'];
+		            $lastColor = $row['color'];
+		            $lastSensorType = $row['sensor_type'];
+				}
 
-			if ($lastId >= 0 && $containData) {
-	        	array_push($collection, array($lastId, utf8_encode($lastName), utf8_encode($lastColor), $lastSensorType, $arr));
+				if ($lastId >= 0 && $containData) {
+		        	array_push($collection, array($lastId, utf8_encode($lastName), utf8_encode($lastColor), $lastSensorType, $arr));
+		        }
 	        }
-	        }
-	        
+		        
 			$outStr = json_encode($collection);
-	        
+		        
 			if(isset($_GET['usecache']) && $_GET['usecache'] == "true") 
 			{
 				$this->writeCache($from, $period, $outStr);
@@ -194,9 +194,9 @@ class Readings
 			
 			mysql_free_result($result);
 		}
+		
 		return $outStr;
 	}
-
 
 	public function getCacheFileName($from, $period) {
 		return Settings::CACHE_DIR . $from . '_' . $period;
