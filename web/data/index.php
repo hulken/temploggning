@@ -73,6 +73,10 @@ $api->get('/weatherforecast/:source', function ($source) {
             $time_limit = ((time() + ($period*0.5)*24*60*60)*1000);
         }
     }
+    else {
+        echo('[]');
+        return;
+    }
     switch ($source) {
         case 'all':
             echo($weatherForecast->all($_GET['lat'],$_GET['lng'],$_GET['place'],$time_limit));
