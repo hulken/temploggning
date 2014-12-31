@@ -14,6 +14,7 @@ class Readings
 
 		$groupby = "";
 		$from = 0;
+		$calculatedPeriod = false;
 		
 		$dbTimeZone = Settings::DATABASE_TIME_ZONE;
 		$webTimeZone = Settings::WEB_TIME_ZONE;
@@ -21,6 +22,7 @@ class Readings
 		if(isset($_GET['from']) && isset($_GET['to'])) {
 			$from = $_GET['from'];
 			$period = (($_GET['to'] - $_GET['from']) * (1/60) * (1/60) * (1/24));
+			$calculatedPeriod = true;
 
 			if (!v::numeric()->positive()->validate($period)) {
 				http_response_code(500);
@@ -28,16 +30,18 @@ class Readings
 			}
 		}
 		
-		if(isset($_GET['period'])) {
-			$period = $_GET['period'];
-			
-			if($period === 'latest' || $period === 'statistics-minmax'){
-				$period = 10000;
+		if (!$calculatedPeriod) {
+			if(isset($_GET['period'])) {
+				$period = $_GET['period'];
+				
+				if($period === 'latest' || $period === 'statistics-minmax'){
+					$period = 10000;
+				}
+			} else if(!isset($period)){
+				$period = 1;
 			}
-		} else if(!isset($period)){
-			$period = 1;
 		}
-		
+
 		if ($period >= 1) {
 			if ($period >= 1825) {
 				$d = "%Y-%m"; // Group by month

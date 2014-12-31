@@ -151,7 +151,7 @@ TempChart.Charter.prototype = {
 					me.createChartView(series, 7); // 144 data points (3 enough, but using instead to display forecast properly)
 				}
 				else { // Custom?
-					me.createChartView(series, 2); 
+					me.createChartView(series, 30); // Hard to find a decent value for this, since it will always depend on what the user select (Automtaically calculated period on server) 
 				}
 
 				// Hide not choosen series from cookie
@@ -169,7 +169,7 @@ TempChart.Charter.prototype = {
 		};
 
 		$(document).on('submit','#customView',function(e) {
-			var period = me.INTERVALS.day;
+			var period = null; // Need to be empty to let server decide dynamically
 			var from = (new Date($('#fromdatetime').val() + ':00')).getTime()/1000;
 			var to = (new Date($('#todatetime').val() + ':00')).getTime()/1000;
 			console.log('EVENT FIRE LOAD_READINGS ::', period, from, to);
