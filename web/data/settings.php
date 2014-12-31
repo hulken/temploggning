@@ -1,15 +1,22 @@
 <?php ## Settings for database connection
 
-// Basic settings
-$sql_engine	= "MySQL";
-$sql_server = "localhost";
-$sql_user	= "temploggning";
-$sql_passw	= "temploggning";
-$sql_database = "temploggning";
+function connect_database() {
+	// Basic settings
+	$sql_engine	= "MySQL";
+	$sql_server = "localhost";
+	$sql_user	= "temploggning";
+	$sql_passw	= "temploggning";
+	$sql_database = "temploggning";
 
-// Setup connection
-$connection = mysql_connect($sql_server, $sql_user, $sql_passw) or die (mysql_error());
-@mysql_select_db("$sql_database") or die( "Unable to select database");
+	// Setup connection
+	$connection = new mysqli($sql_server, $sql_user, $sql_passw, $sql_database);
+
+	if ($connection->connect_errno > 0){
+	    die('Unable to connect to database [' . $connection->connect_error . ']');
+	}
+
+	return $connection;
+}
 
 class Settings
 {
@@ -24,6 +31,6 @@ function sqlerr($file = '', $line = '')
 {
   print("<table border=0 bgcolor=blue align=left cellspacing=0 cellpadding=10 style='background: blue'>" .
     "<tr><td class=embedded><font color=white><h1>SQL Error</h1>\n" .
-  "<b>" . mysql_error() . ($file != '' && $line != '' ? "<p>in $file, line $line</p>" : "") . "</b></font></td></tr></table>");
+  "<b>" . $db->error . ($file != '' && $line != '' ? "<p>in $file, line $line</p>" : "") . "</b></font></td></tr></table>");
   die;
 }

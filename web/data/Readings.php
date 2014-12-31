@@ -123,8 +123,10 @@ class Readings
 			if (isset($_GET['debug'])) {
 				echo $query . "<br /><br />";
 			}
-						 
-			$result = mysql_query($query) or die(mysql_error().' '.sqlerr(__FILE__, __LINE__));
+			
+			require_once 'settings.php';
+			$db = connect_database();			 
+			$result = $db->query($query) or die($db->error.' '.sqlerr(__FILE__, __LINE__));
 			
 	        $lastId = -1;
 	        $collection = array();
@@ -136,7 +138,7 @@ class Readings
 		    if(isset($_GET['period']) && ($_GET['period'] == 'statistics-minmax'))
 		    {
 		    // TODO
-				while($row = mysql_fetch_array($result)) 
+				while($row = $result->fetch_assoc()) 
 				{
 	                 array_push($collection, array($row['sensor_id'], $row['maxval'], $row['minval']));
 		            
@@ -150,7 +152,7 @@ class Readings
 		    }
 		    else
 		    {  
-				while($row = mysql_fetch_array($result)) 
+				while($row = $result->fetch_assoc()) 
 				{
 		            if (intval($row['sensor_id']) != $lastId) {                
 		                if (isset($arr)) {
@@ -195,7 +197,8 @@ class Readings
 				$this->writeCache($from, $period, $outStr);
 			}
 			
-			mysql_free_result($result);
+			$result->free();
+			$db->close();
 		}
 		
 		return $outStr;
