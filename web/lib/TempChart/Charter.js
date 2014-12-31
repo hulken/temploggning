@@ -227,21 +227,21 @@ TempChart.Charter.prototype = {
 	 */
 	visualizeSingleValuesView: function(series) {
 		var me = this;
-		me._sortSeries(series, 'name');
 		me.$controlsElement.html('');
 		
-		var spacerAdded = false;
 		var colorClass = 'header-black';
 		var tableStr = '<table class="table latest-table table-responsive"><tbody>';
 		$.each(series, function(i, serie) {
 			if (serie.data.length > 0) {
 				var unit = series[i].tooltip.valueSuffix;
 				d = Highcharts.dateFormat('%Y-%m-%d %H:%M', new Date(serie.data[0][0]));
-				if((i) < series.length && series[(i)].data[0][0] < ((new Date().getTime()) - 86400000) && !spacerAdded) {
-					//tableStr += '<tr><td class="latest-spacer"></td><td class="latest-spacer"></td></tr>';
-					spacerAdded = true;
+				if((i) < series.length && series[(i)].data[0][0] < ((new Date().getTime()) - 86400000)) {
 					colorClass = 'header-gray';
 				} 
+				else {
+					colorClass = 'header-black';
+				}
+
 				tableStr += '<tr class="' + colorClass +'"><td class="first-td"><h1 class="heading1">' + serie.data[0][1].toFixed(1) + '</h1></td><td class="second-td">' + unit + ' - ' + serie.name + '<br><span class="latest-date">' + d + '</span></td></tr>';
 			}
 			
