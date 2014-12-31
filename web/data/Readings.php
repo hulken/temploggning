@@ -9,7 +9,6 @@ class Readings
 	}
 
 	public function read() {
-		header('Content-type: application/json');
 		$arr = Array();
 
 		$groupby = "";

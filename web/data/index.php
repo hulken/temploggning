@@ -10,6 +10,7 @@ include_once 'WeatherForecast.php';
 \Slim\Slim::registerAutoloader();
 
 $api = new \Slim\Slim();
+$api->response->headers->set('Content-type', 'application/json');
 
 // Readings
 // -------------------
