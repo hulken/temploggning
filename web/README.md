@@ -1,3 +1,7 @@
+###Setup configuration:
+Rename config-sample.js to config.js.
+In data rename settings-sample.php to settings.php. 
+And change the configurations to match your environment.
 
 ###To configure the REST-services:
 
