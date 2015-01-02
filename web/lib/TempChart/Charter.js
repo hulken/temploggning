@@ -413,7 +413,7 @@ TempChart.Charter.prototype = {
                 spline: {
                     events: {
                       legendItemClick: function () {
-                        me.setCookie(this.name, !this.visible, 7);
+                        me.setCookie('sensor' + this.options.sensorId, !this.visible, 7);
                       }
                     },
                     lineWidth: 2,
@@ -678,7 +678,7 @@ TempChart.Charter.prototype = {
                 spline: {
                     events: {
                       legendItemClick: function () {
-                        me.setCookie(this.name, !this.visible, 7);
+                        me.setCookie('sensor' + this.sensorId, !this.visible, 7);
                       }
                     },
                     lineWidth: 2,

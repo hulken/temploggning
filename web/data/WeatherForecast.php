@@ -34,7 +34,7 @@ class WeatherForecast {
             'data_type' => 'SMHI',
             'url' => 'http://opendata-download-metfcst.smhi.se/api/category/pmp1.5g/version/1/geopoint/',
             'sensor_name' => 'SMHI Forecast',
-            'sensor_id' => 998,
+            'sensor_id' => 997,
             'sensor_type' => 'f0',
             'sensor_color' => '#000000'
         ); 
@@ -48,6 +48,7 @@ class WeatherForecast {
             $forecast_json = json_decode($forecast_json_str);
             $time_series = $forecast_json->timeseries;
             $converted_json_temp = $this->convertData($time_series, $source_conf, $time_limit);
+            $source_conf['sensor_id'] = 998;
             $source_conf['sensor_type'] = 'f1';
             $converted_json_pressure = $this->convertData($time_series, $source_conf, $time_limit);
             
