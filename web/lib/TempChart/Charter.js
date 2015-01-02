@@ -108,7 +108,6 @@ TempChart.Charter.prototype = {
   bindEvents: function() {
     var me = this;
     $(document).bind('TempChart_readings_loaded', function(e, series, period) {
-      debugger;
       if(period === 'latest') {
         me.visualizeSingleValuesView(series);
       } else if(period === 'statistics-minmax') {
