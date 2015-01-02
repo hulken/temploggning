@@ -98,9 +98,9 @@ For raspberry pi installation follow instructions found here http://www.raspberr
 
 
 ###Logging LogToDatabase.py
-     
-Review the mysql host settings in logToDatabase.conf file:  
-Most important is the type of logger_type!  
+
+Rename logoToDatabase-sample.conf to logoToDatabase.conf and review the mysql host settings.
+Most important is to change the type of logger_type!  
 And also database: host, user, password, database
     
 Run the script (Prerequisites: The database table schema (v4) need to be in place before running the script. The script also need to be runneble with: chmod +x LogToDatabase.py)  
