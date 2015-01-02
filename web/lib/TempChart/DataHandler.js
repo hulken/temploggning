@@ -175,6 +175,7 @@ TempChart.DataHandler.prototype = {
                 
                 if (data[3] == 0 || data[3] == 'f0') { // temp (and forecast temp)
 					me.series.push({
+						sensorId: data[0],
 	                	name: data[1],
 	                	color: data[2],
 	                	dashStyle: (data[3] == 'f0') ? 'solid' : 'solid',
@@ -186,6 +187,7 @@ TempChart.DataHandler.prototype = {
 				}
 				else if (data[3] == 1  || data[3] == 'f1') { // humidity (and forecast humidity)
 					me.series.push({
+						sensorId: data[0],
 	                	name: data[1],
 	                	color: data[2],
 	                	yAxis: 1,
@@ -198,6 +200,7 @@ TempChart.DataHandler.prototype = {
 				}			
 				else if (data[3] == 2) { // electricity
 					me.series.push({
+						sensorId: data[0],
 	                	name: data[1],
 	                	color: data[2],
 	                	yAxis: 2,
