@@ -40,11 +40,17 @@ class CustomReadings
                     ."   WHERE s.hidden = false and DATE_SUB(NOW(),INTERVAL 24 HOUR) <= r.date "
                     ."   GROUP BY s.sensor_id"
                     ." ) as t3 on t3.sensor_id = t1.sensor_id ";
-		$result = mysql_query($query) or die(mysql_error().' '.sqlerr(__FILE__, __LINE__));
+          require_once 'settings.php';
+          $db = connect_database();
+          $result = $db->query($query) or die($db->error.' '.sqlerr(__FILE__, __LINE__));
 		$sensors = array();
-		while( $row = mysql_fetch_assoc( $result)){
+
+		while ($row = $result->fetch_assoc()) {
  		   array_push($sensors,$row);
 		}
+
+          $db->close();
+          
 		return json_encode($sensors);
 	}
 }

@@ -1,5 +1,6 @@
 ##Temperature logging
-Logger for sensor data from 1-wire and tellstick to mysql 
+Logger for sensor data from 1-wire and tellstick to mysql
+Note: There's also a REST API available (See web\data\README.md for information)
 
 ###Tellstic Duo
 Add the following lines to your /etc/apt/sources.list:

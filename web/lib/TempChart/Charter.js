@@ -78,9 +78,15 @@ TempChart.Charter.prototype = {
 		}
 	},
 	HOURS: ['NULL','00:00','01:00', '02:00', '03:00', '04:00', '05:00', '06:00', '07:00', '08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00', '19:00', '20:00', '21:00', '22:00', '23:00', '00:00'],
-  WEEKDAYS: ['NULL','Man', 'Tis', 'Ons', 'Tor', 'Fre', 'Lor', 'Son'],
+	WEEKDAYS: ['NULL','Man', 'Tis', 'Ons', 'Tor', 'Fre', 'Lor', 'Son'],
 	MONTHS: ['NULL', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-  xAxisCATEGORIES: [],
+	xAxisCATEGORIES: [],
+	INTERVALS: {
+		day: 1,
+		week: 7,
+		month: 30,
+		year: 100000
+	},
 	// Varibles
 	// ---------------
 	$mainElement: null,
@@ -107,13 +113,24 @@ TempChart.Charter.prototype = {
 			} else if(period === 'statistics-minmax') {
 				me.visualizeMinMaxView(series);
 			} else if (period === 'statistics-avg-hour' || period === 'statistics-avg-weekday' || period === 'statistics-avg-month' ){
-        //Set xAxis labels
-        if (period === 'statistics-avg-hour') { me.xAxisCATEGORIES = me.HOURS; }
-        if (period === 'statistics-avg-weekday') { me.xAxisCATEGORIES = me.WEEKDAYS; }
-        if (period === 'statistics-avg-month') { me.xAxisCATEGORIES = me.MONTHS; }
-        
-					me._createStatisticsView(series);		
-					// Hide not choosen series from cookie
+				//Set xAxis labels
+				if (period === 'statistics-avg-hour') { 
+					me.xAxisCATEGORIES = me.HOURS;
+					me._createStatisticsView(series, 1);
+				}
+				else if (period === 'statistics-avg-weekday') { 
+					me.xAxisCATEGORIES = me.WEEKDAYS;
+					me._createStatisticsView(series, 1);
+				}
+				else if (period === 'statistics-avg-month') { 
+					me.xAxisCATEGORIES = me.MONTHS; 
+					me._createStatisticsView(series, 2);
+				}
+				else {
+					me._createStatisticsView(series, 2);	
+				}
+				
+				// Hide not choosen series from cookie
 		      	$.each(me.chart.series, function(i, serie) {
 		        	var cookieValue = me.getCookie(serie.name);
 		          	if (cookieValue == 'false') {
@@ -121,7 +138,21 @@ TempChart.Charter.prototype = {
 		          	}
 		      	});	
 			} else {
-				me.createChartView(series); 
+				if (period === me.INTERVALS['year']) {
+					me.createChartView(series, 30); // 365 data points
+				}
+				else if (period === me.INTERVALS['month']) {
+					me.createChartView(series, 20); // 30 data points
+				}
+				else if (period === me.INTERVALS['week']) {
+					me.createChartView(series, 42); // 168 data points (7 enough, but using instead to display forecast properly)
+				}
+				else if (period === me.INTERVALS['day']) {
+					me.createChartView(series, 7); // 144 data points (3 enough, but using instead to display forecast properly)
+				}
+				else { // Custom?
+					me.createChartView(series, 30); // Hard to find a decent value for this, since it will always depend on what the user select (Automtaically calculated period on server) 
+				}
 
 				// Hide not choosen series from cookie
 		      	$.each(me.chart.series, function(i, serie) {
@@ -138,7 +169,7 @@ TempChart.Charter.prototype = {
 		};
 
 		$(document).on('submit','#customView',function(e) {
-			var period = null;
+			var period = null; // Need to be empty to let server decide dynamically
 			var from = (new Date($('#fromdatetime').val() + ':00')).getTime()/1000;
 			var to = (new Date($('#todatetime').val() + ':00')).getTime()/1000;
 			console.log('EVENT FIRE LOAD_READINGS ::', period, from, to);
@@ -177,8 +208,7 @@ TempChart.Charter.prototype = {
 		 else if(period === 'custom') {
 			this._createCustomView();
 		} else if (period === 'statistics-avg-hour' || period === 'statistics-avg-weekday' || period === 'statistics-avg-month'  ) {
-      this.startAutoRefresh();
-			this._createStatisticsView();
+      		this.startAutoRefresh();
 			this.$controlsElement.html('');
 			console.log('EVENT FIRE LOAD_READINGS ::', period);
 			$(document).trigger('TempChart_load_readings', [period]);
@@ -187,6 +217,8 @@ TempChart.Charter.prototype = {
 			this.$controlsElement.html('');
 			console.log('EVENT FIRE LOAD_READINGS ::', period);
 			$(document).trigger('TempChart_load_readings', [period]);
+
+
 		}
 	},
 
@@ -195,21 +227,21 @@ TempChart.Charter.prototype = {
 	 */
 	visualizeSingleValuesView: function(series) {
 		var me = this;
-		me._sortSeries(series, 'name');
 		me.$controlsElement.html('');
 		
-		var spacerAdded = false;
 		var colorClass = 'header-black';
 		var tableStr = '<table class="table latest-table table-responsive"><tbody>';
 		$.each(series, function(i, serie) {
 			if (serie.data.length > 0) {
 				var unit = series[i].tooltip.valueSuffix;
 				d = Highcharts.dateFormat('%Y-%m-%d %H:%M', new Date(serie.data[0][0]));
-				if((i) < series.length && series[(i)].data[0][0] < ((new Date().getTime()) - 86400000) && !spacerAdded) {
-					//tableStr += '<tr><td class="latest-spacer"></td><td class="latest-spacer"></td></tr>';
-					spacerAdded = true;
+				if((i) < series.length && series[(i)].data[0][0] < ((new Date().getTime()) - 86400000)) {
 					colorClass = 'header-gray';
 				} 
+				else {
+					colorClass = 'header-black';
+				}
+
 				tableStr += '<tr class="' + colorClass +'"><td class="first-td"><h1 class="heading1">' + serie.data[0][1].toFixed(1) + '</h1></td><td class="second-td">' + unit + ' - ' + serie.name + '<br><span class="latest-date">' + d + '</span></td></tr>';
 			}
 			
@@ -252,12 +284,13 @@ TempChart.Charter.prototype = {
 	 * @param 	series 		array 		highcharts data series array
 	 *
 	 */
-	createChartView: function(series) {
+	createChartView: function(series, gapSize) {
 		var me = this;
         this.chart = new Highcharts.Chart({
         	credits: { enabled: false },
             chart: {
                 renderTo: this.MAIN_ELEMENT_ID,
+                defaultSeriesType: 'spline',
                 type: 'spline',
                 zoomType: 'x'
             },
@@ -383,13 +416,16 @@ TempChart.Charter.prototype = {
                       }
                     },
                     lineWidth: 2,
+                    connectNulls: false,
+                    gapSize: gapSize, /* Day: 2, Week: 5, Month: 10, Year = 20 */ 
                     states: {
                         hover: {
                             lineWidth: 5
                         }
                     },
                     marker: {
-                        enabled: false,
+                        enabled: true,
+                        radius: 1,
                         states: {
                             hover: {
                                 enabled: true,
@@ -515,7 +551,7 @@ TempChart.Charter.prototype = {
 		/* _createStatisticsView
 	 * 
 	 */
-	_createStatisticsView: function(series) {   
+	_createStatisticsView: function(series, gapSize) {   
 		var me = this;
         this.chart = new Highcharts.Chart({
         	credits: { enabled: false },
@@ -575,7 +611,8 @@ TempChart.Charter.prototype = {
                     from: -40,
                     to: 0,
                     color: 'rgba(68, 170, 213, 0.05)',
-                }]
+                }],
+                showEmpty: false
             }, { // Secondary yAxis
                 gridLineWidth: 0,
                 title: {
@@ -596,7 +633,8 @@ TempChart.Charter.prototype = {
 						color: '#000000'
                     }
                 },
-                opposite: true
+                opposite: true,
+                showEmpty: false
 			}, { // Third yAxis
                 gridLineWidth: 0,
                 title: {
@@ -617,7 +655,8 @@ TempChart.Charter.prototype = {
 						color: '#000000'
                     }
                 },
-                opposite: true
+                opposite: true,
+                showEmpty: false
 			}],
             tooltip: {
                 formatter: function() {
@@ -642,6 +681,8 @@ TempChart.Charter.prototype = {
                       }
                     },
                     lineWidth: 2,
+                    connectNulls: false,
+                    gapSize: gapSize,
                     states: {
                         hover: {
                             lineWidth: 5
@@ -756,16 +797,16 @@ TempChart.Charter.prototype = {
 				return hash.replace('#','');
 				break;
 			case '#day': 
-				return 1;
+				return this.INTERVALS['day'];
 				break;
 			case '#week': 
-				return 7;
+				return this.INTERVALS['week'];
 				break;
 			case '#month': 
-				return 30;
+				return this.INTERVALS['month'];
 				break;
 			case '#year': 
-				return 100000;
+				return this.INTERVALS['year'];
 				break;	
 			default:
 				return 'latest'; // Start view

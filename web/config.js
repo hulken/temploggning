@@ -3,6 +3,7 @@ var CLIENT_CONFIG = {
     CONTROLS_ELEMNT_ID: 'controls',
     STATISTICS_DATA_URL: '/temploggning/drakkedata/customreadings',
     DATA_URL: [
+    	'data/readings',
         'data/weatherforecast/all?lat=58.8471&lng=16.9295&place=Sweden/Södermanland/Råby-Rönö'
     ],
     USE_CACHE: false,

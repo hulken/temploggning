@@ -10,6 +10,7 @@ include_once 'WeatherForecast.php';
 \Slim\Slim::registerAutoloader();
 
 $api = new \Slim\Slim();
+$api->response->headers->set('Content-type', 'application/json');
 
 // Readings
 // -------------------
@@ -42,6 +43,21 @@ $api->put('/sensor/:id', function ($id) use ($api) {
     	echo($sensors->update($id, $json->name, $json->id, $json->color));
     }
 });
+
+// Log API
+// -------------------
+$api->put('/log/:id', function ($sensor_id) use ($api) {
+    $sensors = new Sensors();
+    $request = $api->request();
+    $json = json_decode($request->getBody());
+
+    if (isset($json->value)) {
+        echo($sensors->log($sensor_id, $json->value));
+    }
+    else  {
+        echo 'Invalid input (Please provide proper JSON data: value must be set)';
+    }
+});
 // -------------------
 
 // WeatherForecast
@@ -57,6 +73,10 @@ $api->get('/weatherforecast/:source', function ($source) {
         } else {
             $time_limit = ((time() + ($period*0.5)*24*60*60)*1000);
         }
+    }
+    else {
+        echo('[]');
+        return;
     }
     switch ($source) {
         case 'all':
