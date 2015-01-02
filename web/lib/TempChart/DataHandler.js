@@ -62,6 +62,7 @@ TempChart.DataHandler.prototype = {
     
     $(document).bind('TempChart_load_customReadings', function(e, readings) { 
       console.log('EVENT READ LOAD_CUSTOMREADINGS ::');
+      me.series = []; // Reset data series
       me.doLoadReadings(me.STATISTICS_DATA_URL, readings, null, null, function(series, period) {
         $(document).trigger('TempChart_readings_loaded', [series, period]);
         console.log('EVENT FIRE READINGS_LOADED ::', series, period);
