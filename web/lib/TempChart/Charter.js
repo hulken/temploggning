@@ -24,6 +24,9 @@ TempChart.Charter = TempChart.Charter ||
       Highcharts.setOptions({
           global: {
               useUTC: false
+          },
+          exporting: { 
+          	enabled: false 
           }
       });
     } else {
