@@ -3,8 +3,7 @@ use Respect\Validation\Validator as v;
 
 class Sensors {
     
-  public function __construct()
-    {
+  public function __construct() {
 
   }
 
@@ -14,10 +13,10 @@ class Sensors {
     $query = 'SELECT * FROM sensors;';
     require_once 'settings.php';
     $db = connect_database();
-    $result = $db->query($query) or die($db->error.' '.sqlerr(__FILE__, __LINE__));
+    $result = $db->query($query) or die($db->error . ' ' . sqlerr(__FILE__, __LINE__));
     $sensors = array();
 
-    while( $row = $result->fetch_assoc()) {
+    while ($row = $result->fetch_assoc()) {
        array_push($sensors, $row);
     }
 
@@ -32,7 +31,7 @@ class Sensors {
     $query = "UPDATE sensors SET name='$name', id='$id', color='$color' WHERE sensor_id=$sensor_id;";
     require_once 'settings.php';
     $db = connect_database();
-    $result = $db->query($query) or die($db->error.' '.sqlerr(__FILE__, __LINE__));
+    $result = $db->query($query) or die($db->error . ' ' . sqlerr(__FILE__, __LINE__));
     $db->close();
 
     if ($result == FALSE) {
@@ -50,12 +49,12 @@ class Sensors {
     // Input validation
     if (!v::numeric()->validate($value)) {
       http_response_code(500);
-      die('{ "error": "Invalid input (value)"}');
+      die('{ "error": "Invalid input (value)" }');
     }
 
     if (!v::numeric()->positive()->validate($value)) {
       http_response_code(500);
-      die('{ "error": "Invalid input (sensor_id)"}');
+      die('{ "error": "Invalid input (sensor_id)" }');
     }
 
     // Insert information into database

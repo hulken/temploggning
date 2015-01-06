@@ -41,11 +41,11 @@ class CustomReadings
               ." ) as t3 on t3.sensor_id = t1.sensor_id ";
     require_once 'settings.php';
     $db = connect_database();
-    $result = $db->query($query) or die($db->error.' '.sqlerr(__FILE__, __LINE__));
+    $result = $db->query($query) or die($db->error . ' ' . sqlerr(__FILE__, __LINE__));
     $sensors = array();
 
     while ($row = $result->fetch_assoc()) {
-       array_push($sensors,$row);
+       array_push($sensors, $row);
     }
 
     $db->close();
