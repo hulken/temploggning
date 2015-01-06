@@ -147,40 +147,40 @@ class Readings {
         }
       }
       else {
-        while ($row = $result->fetch_assoc()) {
-          if (intval($row['sensor_id']) != $lastId) {
-            if (isset($arr)) {
-              if ($lastId >= 0 && $containData) {
-                array_push($collection, array($lastId, utf8_encode($lastName), utf8_encode($lastColor), $lastSensorType, $arr));
+          while ($row = $result->fetch_assoc()) {
+              if (intval($row['sensor_id']) != $lastId) {
+                  if (isset($arr)) {
+                      if ($lastId >= 0 && $containData) {
+                          array_push($collection, array($lastId, utf8_encode($lastName), utf8_encode($lastColor), $lastSensorType, $arr));
+                      }
+
+                      unset($arr);
+                      $arr = array();
+                      $containData = false;
+                  }
+
+                  $lastId = intval($row['sensor_id']);
               }
 
-              unset($arr);
-              $arr = array();
-              $containData = false;
-            }
+              // We don't want to add seconds for statistics
+              if (isset($period) && ($period == 'statistics-avg-hour' || $period == 'statistics-avg-weekday' || $period == 'statistics-avg-month') && intval($row['date']) > 0) {
+                  $containData = true;
+                  array_push($arr, array((intval($row['date'])), floatval($row['temp'])));
+              }
+              // Add seconds
+              else if (intval($row['date']) > 0) {
+                  $containData = true;
+                  array_push($arr, array((intval($row['date']) * 1000), floatval($row['temp'])));
+              }
 
-            $lastId = intval($row['sensor_id']);
+              $lastName = $row['name'];
+              $lastColor = $row['color'];
+              $lastSensorType = $row['sensor_type'];
           }
 
-          // We don't want to add seconds for statistics
-          if (isset($_GET['period']) && ($_GET['period'] == 'statistics-avg-hour' || $_GET['period'] == 'statistics-avg-weekday' || $_GET['period'] == 'statistics-avg-month') && intval($row['date']) > 0) {
-            $containData = true;
-            array_push($arr, array((intval($row['date'])), floatval($row['temp'])));
+          if ($lastId >= 0 && $containData) {
+              array_push($collection, array($lastId, utf8_encode($lastName), utf8_encode($lastColor), $lastSensorType, $arr));
           }
-          // Add seconds
-          else if (intval($row['date']) > 0) {
-              $containData = true;
-              array_push($arr, array((intval($row['date']) * 1000), floatval($row['temp'])));
-            }
-
-          $lastName = $row['name'];
-          $lastColor = $row['color'];
-          $lastSensorType = $row['sensor_type'];
-        }
-
-        if ($lastId >= 0 && $containData) {
-          array_push($collection, array($lastId, utf8_encode($lastName), utf8_encode($lastColor), $lastSensorType, $arr));
-        }
       }
 
       $outStr = json_encode($collection);
