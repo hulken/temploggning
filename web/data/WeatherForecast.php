@@ -188,7 +188,7 @@ EOT
     
     // Sørger for å laste ned XML fra yr.no og leverer data tilbake i en streng
     private function loadXMLData($xml_url,$try_curl=true,$timeout=10){
-      getallheaders(oid)lobal $yr_datadir;
+      global $yr_datadir;
       $xml_url.='/varsel.xml';
       // Lag en timeout på contexten
       $ctx = stream_context_create(array( 'http' => array('timeout' => $timeout)));
