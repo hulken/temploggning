@@ -6,7 +6,9 @@ class Readings {
 
   }
 
-  public function read() {
+  public function read($from, $to, $period, $useCache, $debug) {
+    $this->validateInput($from, $to, $period, $useCache, $debug);
+
     $arr = array();
 
     $groupby = "";
@@ -16,41 +18,41 @@ class Readings {
     $dbTimeZone = Settings::DATABASE_TIME_ZONE;
     $webTimeZone = Settings::WEB_TIME_ZONE;
 
-    if (isset($_GET['from']) && isset($_GET['to'])) {
-      $from = $_GET['from'];
-      $period = (($_GET['to'] - $_GET['from']) * (1/60) * (1/60) * (1/24));
+    if (isset($from) && isset($to)) {
+      $periodValue = (($to - $from) * (1/60) * (1/60) * (1/24));
       $calculatedPeriod = true;
 
-      if (!v::numeric()->positive()->validate($period)) {
+      if (!v::numeric()->positive()->validate($periodValue)) {
         http_response_code(500);
         die('{ "error": "Invalid interval selected" }');
       }
     }
 
     if (!$calculatedPeriod) {
-      if (isset($_GET['period'])) {
-        $period = $_GET['period'];
-
+      if (isset($period)) {
         if ($period === 'latest' || $period === 'statistics-minmax') {
-          $period = 10000;
+          $periodValue = 10000;
+        }
+        else {
+          $periodValue =  $period;
         }
       }
-      else if (!isset($period)) {
-          $period = 1;
-        }
+      else {
+          $periodValue = 1;
+      }
     }
 
-    if ($period >= 1) {
-      if ($period >= 1825) {
+    if ($periodValue >= 1) {
+      if ($periodValue >= 1825) {
         $d = "%Y-%m"; // Group by month
       }
-      if ($period >= 120) {
+      if ($periodValue >= 120) {
         $d = "%Y %u"; // Group by week
       }
-      else if ($period >= 30) {
+      else if ($periodValue >= 30) {
           $d = "%Y-%m-%d"; // Group by day
         }
-      else if ($period >= 7) {
+      else if ($periodValue >= 7) {
           $d = "%Y-%m-%d %H"; // Group by hour
         }
       else {
@@ -60,26 +62,23 @@ class Readings {
       $groupby = "r.sensor_id, DATE_FORMAT(r.date, '" . $d . "') ";
     }
 
-    if (isset($_GET['from']) && isset($_GET['to'])) {
-      $where = "r.date BETWEEN FROM_UNIXTIME(" . $_GET['from'] . ") AND FROM_UNIXTIME(" . $_GET['to'] . ") ";
+    if (isset($from) && isset($to)) {
+      $where = "r.date BETWEEN FROM_UNIXTIME(" . $from . ") AND FROM_UNIXTIME(" . $to . ") ";
     } else {
-      $where = "DATE_SUB(NOW(),INTERVAL " . $period ." DAY) <= r.date ";
+      $where = "DATE_SUB(NOW(),INTERVAL " . $periodValue ." DAY) <= r.date ";
     }
 
     $order = "date ASC";
 
-    // Set back the period properly in order to not mess up the jsoncache
-    if (isset($_GET['period']) && $period == 10000) {
-      $period = 0;
-    }
-
     //Try to read from cache
-    if (isset($_GET['usecache']) && $_GET['usecache'] == "true") {
+    if (isset($useCache) && $useCache == "true") {
       $outStr = $this->readCache($from, $period);
+
+      return $outStr;
     }
 
     if (!isset($outStr) || !$outStr) {
-      if (isset($_GET['period']) && $_GET['period'] == 'latest') { // Latest readings
+      if (isset($period) && $period == 'latest') { // Latest readings
         $query = "SELECT UNIX_TIMESTAMP(i.date) AS date, i.sensor_id, ROUND(r.temp, 1) AS temp, s.name, s.color, s.sensor_type FROM readings r"
           . " RIGHT JOIN ("
           . " SELECT MAX(date) AS date, sensor_id FROM readings GROUP BY sensor_id"
@@ -88,21 +87,21 @@ class Readings {
           . " WHERE s.hidden = false"
           . " ORDER BY s.name, s.sensor_type, date ASC";
       }
-      else if (isset($_GET['period']) && $_GET['period'] == 'statistics-avg-hour') { // List of statistics readings hourperday
+      else if (isset($period) && $period == 'statistics-avg-hour') { // List of statistics readings hourperday
           $query = "SELECT EXTRACT(HOUR FROM CONVERT_TZ(r.date,'$dbTimeZone','$webTimeZone'))+1 AS date, ROUND(AVG(r.temp), 1) AS temp, s.sensor_id, s.name, s.color, s.sensor_type FROM readings r"
             . " LEFT JOIN sensors s ON r.sensor_id = s.sensor_id"
             . " WHERE s.hidden = false"
             . " GROUP BY r.sensor_id, date"
             . " ORDER BY s.sensor_type, s.name, date ASC";
         }
-      else if (isset($_GET['period']) && $_GET['period'] == 'statistics-avg-weekday') { // List of statistics readings dayperweek
+      else if (isset($period) && $period == 'statistics-avg-weekday') { // List of statistics readings dayperweek
           $query = "SELECT WEEKDAY(CONVERT_TZ(r.date,'$dbTimeZone','$webTimeZone'))+1 AS date, ROUND(AVG(r.temp), 1) AS temp, s.sensor_id, s.name, s.color, s.sensor_type FROM readings r"
             . " LEFT JOIN sensors s ON r.sensor_id = s.sensor_id"
             . " WHERE s.hidden = false"
             . " GROUP BY r.sensor_id, date"
             . " ORDER BY s.sensor_type, s.name, date ASC";
         }
-      else if (isset($_GET['period']) && $_GET['period'] == 'statistics-avg-month') { // List of statistics readings dayyear
+      else if (isset($period) && $period == 'statistics-avg-month') { // List of statistics readings dayyear
           $query = "SELECT EXTRACT(MONTH FROM CONVERT_TZ(r.date,'$dbTimeZone','$webTimeZone')) AS date, ROUND(AVG(r.temp), 1) AS temp, s.sensor_id, s.name, s.color, s.sensor_type FROM readings r"
             . " LEFT JOIN sensors s ON r.sensor_id = s.sensor_id"
             . " WHERE s.hidden = false"
@@ -117,7 +116,7 @@ class Readings {
           . " ORDER BY s.sensor_type, s.name, r.date ASC";
       }
 
-      if (isset($_GET['debug'])) {
+      if (isset($debug)) {
         echo $query . "<br /><br />";
       }
 
@@ -132,7 +131,7 @@ class Readings {
       $lastSensorType;
       $containData = false;
 
-      if (isset($_GET['period']) && ($_GET['period'] == 'statistics-minmax')) {
+      if (isset($period) && ($period == 'statistics-minmax')) {
         // TODO
         while ($row = $result->fetch_assoc()) {
           array_push($collection, array($row['sensor_id'], $row['maxval'], $row['minval']));
@@ -185,7 +184,7 @@ class Readings {
 
       $outStr = json_encode($collection);
 
-      if (isset($_GET['usecache']) && $_GET['usecache'] == "true") {
+      if (isset($useCache) && $useCache == "true") {
         $this->writeCache($from, $period, $outStr);
       }
 
@@ -194,6 +193,35 @@ class Readings {
     }
 
     return $outStr;
+  }
+
+  private function validateInput($from, $to, $period, $useCache, $debug) {
+      if (!v::numeric()->validate($from) && !v::nullValue()->validate($from)) {
+          http_response_code(500);
+          die('{ "error": "Invalid from-value('.$from.')" }');
+      }
+
+      if (!v::numeric()->validate($to) && !v::nullValue()->validate($to)) {
+          http_response_code(500);
+          die('{ "error": "Invalid to-value" }');
+      }
+
+      if (!v::numeric()->validate($period) && !v::nullValue()->validate($period)) {
+          if (v::equals('latest')->validate($period)) { }
+          else if (v::equals('statistics-avg-hour')->validate($period)) { }
+          else if (v::equals('statistics-minmax')->validate($period)) { }
+          else if (v::equals('statistics-avg-weekday')->validate($period)) { }
+          else if (v::equals('statistics-avg-month')->validate($period)) { }
+          else {
+              http_response_code(500);
+              die('{ "error": "Invalid period" }');
+          }
+      }
+
+      if (!v::NotEmpty()->validate($debug) && !v::nullValue()->validate($debug)) {
+          http_response_code(500);
+          die('{ "error": "Invalid debug-value" }');
+      }
   }
 
   public function getCacheFileName($from, $period) {

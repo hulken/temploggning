@@ -16,7 +16,7 @@ $api->response->headers->set('Content-type', 'application/json');
 // -------------------
 $api->get('/readings', function () {
   $readings = new Readings();
-  echo($readings->read());
+  echo($readings->read($_GET['from'], $_GET['to'], $_GET['period'], $_GET['usecache'], $_GET['debug']));
 });
 // -------------------
 
