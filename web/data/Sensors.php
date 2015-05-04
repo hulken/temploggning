@@ -13,7 +13,7 @@ class Sensors {
     $query = 'SELECT * FROM sensors;';
     require_once 'settings.php';
     $db = connect_database();
-    $result = $db->query($query) or die($db->error . ' ' . sqlerr(__FILE__, __LINE__));
+    $result = $db->query($query) or die(sqlerr($db->error, __FILE__, __LINE__));
     $sensors = array();
 
     while ($row = $result->fetch_assoc()) {
@@ -31,7 +31,7 @@ class Sensors {
     $query = "UPDATE sensors SET name='$name', id='$id', color='$color' WHERE sensor_id=$sensor_id;";
     require_once 'settings.php';
     $db = connect_database();
-    $result = $db->query($query) or die($db->error . ' ' . sqlerr(__FILE__, __LINE__));
+    $result = $db->query($query) or die(sqlerr($db->error, __FILE__, __LINE__));
     $db->close();
 
     if ($result == FALSE) {
@@ -61,7 +61,7 @@ class Sensors {
     $query = "INSERT INTO readings (sensor_id, temp, date) VALUES ($sensor_id, $value, '" . date("Y-m-d H:i:s") . "');";
     require_once 'settings.php';
     $db = connect_database();
-    $result = $db->query($query) or die($db->error.' '.sqlerr(__FILE__, __LINE__));
+    $result = $db->query($query) or die(sqlerr($db->error, __FILE__, __LINE__));
     
     $db->close();
 

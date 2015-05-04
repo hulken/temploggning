@@ -26,9 +26,9 @@ class Settings {
     const WEB_TIME_ZONE = "+00:00"; // Change to eg "Europe/Stockholm" (will only work if MySQL time zone support are installed http://dev.mysql.com/doc/refman/5.5/en/time-zone-support.html)
 }
 
-function sqlerr($file = '', $line = '') {
+function sqlerr($error, $file = '', $line = '') {
     print("<table border=0 bgcolor=blue align=left cellspacing=0 cellpadding=10 style='background: blue'>" .
         "<tr><td class=embedded><font color=white><h1>SQL Error</h1>\n" .
-        "<b>" . $db->error . ($file != '' && $line != '' ? "<p>in $file, line $line</p>" : "") . "</b></font></td></tr></table>");
+        "<b>" . $error . ($file != '' && $line != '' ? "<p>in $file, line $line</p>" : "") . "</b></font></td></tr></table>");
     die;
 }

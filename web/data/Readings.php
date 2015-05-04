@@ -122,7 +122,8 @@ class Readings {
 
       require_once 'settings.php';
       $db = connect_database();
-      $result = $db->query($query) or die($db->error.' '.sqlerr(__FILE__, __LINE__));
+
+      $result = $db->query($query) or die(sqlerr($db->error, __FILE__, __LINE__));
 
       $lastId = -1;
       $collection = array();
