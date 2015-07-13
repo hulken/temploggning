@@ -16,7 +16,14 @@ $api->response->headers->set('Content-type', 'application/json');
 // -------------------
 $api->get('/readings', function () {
   $readings = new Readings();
-  echo($readings->read($_GET['from'], $_GET['to'], $_GET['period'], $_GET['usecache'], $_GET['debug']));
+  // Set expected query parameters to query value or default null
+  $params = array_fill_keys(array('from', 'to', 'period', 'usecache', 'debug'), null);
+  foreach ($params as $key => $value) {
+    if(!empty($_GET[$key])) {
+      $params[$key] = $_GET[$key];
+    }
+  }
+  echo($readings->read($params['from'], $params['to'], $params['period'], $params['usecache'], $params['debug']));
 });
 // -------------------
 
