@@ -142,7 +142,7 @@ TempChart.Charter.prototype = {
             }); 
       } else {
         if (period === me.INTERVALS['year']) {
-          me.createChartView(series, 30); // 365 data points
+          me.createChartView(series, 100); // The year view could display a lot more than 365 days
         }
         else if (period === me.INTERVALS['month']) {
           me.createChartView(series, 20); // 30 data points
