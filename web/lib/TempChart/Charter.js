@@ -135,7 +135,7 @@ TempChart.Charter.prototype = {
         
         // Hide not choosen series from cookie
             $.each(me.chart.series, function(i, serie) {
-              var cookieValue = me.getCookie(serie.name);
+              var cookieValue = me.getCookie('sensor'+serie.options.sensorId);
                 if (cookieValue == 'false') {
                     serie.setVisible(false);
                 }
@@ -159,7 +159,7 @@ TempChart.Charter.prototype = {
 
         // Hide not choosen series from cookie
             $.each(me.chart.series, function(i, serie) {
-              var cookieValue = me.getCookie(serie.name);
+              var cookieValue = me.getCookie('sensor'+serie.options.sensorId);
                 if (cookieValue == 'false') {
                     serie.setVisible(false);
                 }
