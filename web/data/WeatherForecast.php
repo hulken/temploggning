@@ -1,7 +1,7 @@
 <?php
 
 class WeatherForecast {
-    
+
   public function __construct()
   {
     date_default_timezone_set('UTC');
@@ -13,12 +13,12 @@ class WeatherForecast {
   *   @param      lng         double      Longitude position, used to recive smhi-data
   *   @param      place       string      Yr.no place string typically '/{Country}/{Municipality}/{Town}'
   *   @param      time_limit              (default NULL)
-  *   @return     json-data               JSON array contaning YR and SMHI data       
+  *   @return     json-data               JSON array contaning YR and SMHI data
   */
   public function all($lat, $lng, $place, $time_limit=NULL) {
     $data_array = $this->smhi($lat, $lng, $time_limit, false);
     array_push($data_array,$this->yr($place, $time_limit, false));
-    return json_encode($data_array);   
+    return json_encode($data_array);
   }
 
   /*  smhi
@@ -32,26 +32,26 @@ class WeatherForecast {
   public function smhi($lat, $lng, $time_limit=NULL, $as_json=true) {
     $source_conf = array(
       'data_type' => 'SMHI',
-      'url' => 'http://opendata-download-metfcst.smhi.se/api/category/pmp1.5g/version/1/geopoint/',
+      'url' => 'http://opendata-download-metfcst.smhi.se/api/category/pmp1.5g/version/2/geotype/point/',
       'sensor_name' => 'SMHI Forecast',
       'sensor_id' => 997,
       'sensor_type' => 'f0',
       'sensor_color' => '#000000'
-    ); 
+    );
 
     $converted_json = array();
     $converted_json_temp = array();
     $converted_json_pressure = array();
 
     try {
-      $forecast_json_str = file_get_contents($source_conf['url'] . 'lat/' . $lat .'/lon/' . $lng . '/data.json');
+      $forecast_json_str = file_get_contents($source_conf['url'] . 'lon/' . $lng .'/lat/' . $lat . '/data.json');
       $forecast_json = json_decode($forecast_json_str);
-      $time_series = $forecast_json->timeseries;
+      $time_series = $forecast_json->timeSeries;
       $converted_json_temp = $this->convertData($time_series, $source_conf, $time_limit);
       $source_conf['sensor_id'] = 998;
       $source_conf['sensor_type'] = 'f1';
       $converted_json_pressure = $this->convertData($time_series, $source_conf, $time_limit);
-        
+
     } catch (Exception $e) {
       echo 'Could not get data from SMHI API: ',  $e->getMessage(), "\n";
     }
@@ -87,9 +87,9 @@ class WeatherForecast {
       'sensor_id' => 999,
       'sensor_type' => 'f0',
       'sensor_color' => '#336699'
-    ); 
+    );
     $converted_json = array();
-    
+
     try {
       $yr_xmlparse = new YRComms();
 
@@ -117,15 +117,19 @@ class WeatherForecast {
   private function convertData($time_series, $source_conf, $time_limit=NULL) {
     $converted_json = array();
 
-    for ($i=0; $i < count($time_series); $i++) { 
+    for ($i=0; $i < count($time_series); $i++) {
       if($source_conf['data_type'] == 'YR') {
         $time = intval(strtotime($time_series[$i]['ATTRIBUTES']['FROM']))*1000;
         $value = intval($time_series[$i]['TEMPERATURE'][0]['ATTRIBUTES']['VALUE']);
-          
+
       } elseif ($source_conf['data_type'] == 'SMHI') {
-        $value = $time_series[$i]->t;
-        if($source_conf['sensor_type'] == 'f1') {
-          $value = $time_series[$i]->r;
+        for ($j=0; $j < count($time_series[$i]->parameters); $j++) {
+          $parameter = $time_series[$i]->parameters[$j];
+          if($source_conf['sensor_type'] == 'f1' && $parameter->name == 'r') {
+            $value = $parameter->values[0];
+          } else if($parameter->name == 't') {
+            $value = $parameter->values[0];
+          }
         }
         $time = intval(strtotime($time_series[$i]->validTime))*1000;
       }
@@ -185,7 +189,7 @@ EOT
       //die($data);
       return $data;
     }
-    
+
     // Sørger for å laste ned XML fra yr.no og leverer data tilbake i en streng
     private function loadXMLData($xml_url,$try_curl=true,$timeout=10){
       global $yr_datadir;
